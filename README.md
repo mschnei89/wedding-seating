@@ -22,7 +22,14 @@ Floor columns run `5/6/7`, `8/9/10`, `11/12/13`, `14/15/16`, with the first tabl
 
 Search by name or tag, filter to one tag, group by tag or sort A–Z, and hide guests already seated.
 
-**On a phone**, the guest list becomes a bottom sheet — tap **Guest list**, pick a name, and the sheet gets out of the way so you can tap a seat. A bar along the bottom shows who you're placing. The room opens scaled to fit; use **+** to zoom in far enough to tap comfortably, or **Roster view** to just read the tables as a list.
+## On a phone
+
+The page turns into an app shell rather than a shrunken desktop toolbar:
+
+- A slim header with your names, the current design underneath — tap it to switch designs — and a single **⋯** menu holding everything else.
+- A **Chart / Roster** segmented control. Roster is the fastest way to look someone up.
+- Tap **Guest list**, pick a name, and the sheet gets out of the way so you can tap a seat. The button becomes **Cancel** while you're placing, and the bar tells you who you're holding.
+- The room opens scaled to fit. The floating pill zooms — go in a couple of steps before tapping seats, since everything is small at full-room scale.
 
 ## Designs
 
