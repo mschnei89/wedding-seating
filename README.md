@@ -28,11 +28,11 @@ The page opens on a set of saved designs and lets you keep several side by side:
 
 | Design | Idea |
 | --- | --- |
+| **Mark 1** | **The plan — everyone in their seat. This is what opens by default.** |
 | Head table (locked) | The confirmed head-table picks, nothing else placed |
-| Option A — by circle | Each table is one community, kept intact |
-| Option B — mix & mingle | Every table bridges two circles through a shared connection |
-| Option C — concentric | Distance from the head table tracks closeness to the couple |
-| Option D — your notes | The current working plan |
+| Option A — by circle | Earlier draft: each table is one community, kept intact |
+| Option B — mix & mingle | Earlier draft: every table bridges two circles |
+| Option C — concentric | Earlier draft: distance from the head table tracks closeness |
 
 Use **Save as** to snapshot the current arrangement under a new name, **New** for an empty one, and the dropdown to switch. Every edit auto-saves.
 
