@@ -926,20 +926,27 @@ document.getElementById('movroster').onclick=function(){setView('roster');};
 
 var planEl=document.getElementById('plan'), wrapEl=document.getElementById('planwrap');
 var zoom=1, pendingFit=false;
+function wrapPad(){
+  var cs=getComputedStyle(wrapEl);
+  return {x:parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),
+          y:parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)};
+}
 function applyZoom(z){
   zoom=Math.min(1.6,Math.max(0.3,z));
   planEl.style.transform='scale('+zoom+')';
-  /* transform doesn't affect layout, so the wrapper has to be told the scaled height */
+  /* transform doesn't affect layout, so the wrapper has to be told the scaled height.
+     box-sizing is border-box here, so padding has to be added back in. */
   var h=planEl.offsetHeight;
-  if(h) wrapEl.style.height=Math.ceil(h*zoom)+'px';
+  if(h) wrapEl.style.height=Math.ceil(h*zoom+wrapPad().y)+'px';
   document.getElementById('zoomlvl').textContent=Math.round(zoom*100)+'%';
 }
 function fitZoom(){
-  var avail=wrapEl.clientWidth, natural=planEl.offsetWidth;
+  /* clientWidth includes padding, so subtract it or the room overflows to the right */
+  var avail=wrapEl.clientWidth-wrapPad().x, natural=planEl.offsetWidth;
   /* A hidden tab or a not-yet-laid-out pane reports 0 here. Fitting to that
      collapses the room to the minimum zoom and it stays that way, so wait
      until there is something real to measure. */
-  if(!avail||!natural){ pendingFit=true; return; }
+  if(avail<=0||!natural){ pendingFit=true; return; }
   pendingFit=false;
   applyZoom(Math.min(1, avail/natural));
 }
