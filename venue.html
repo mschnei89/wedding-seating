@@ -23,13 +23,19 @@
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
   #views button.on{background:var(--gold);border-color:var(--gold);color:#241f10}
 
-  #card{position:fixed;left:50%;transform:translateX(-50%) translateY(14px);bottom:78px;z-index:12;
-    background:rgba(255,255,255,.96);border-radius:14px;padding:12px 16px;min-width:210px;max-width:82vw;
-    box-shadow:0 8px 30px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
-  #card.on{opacity:1;transform:translateX(-50%) translateY(0)}
-  #card .nm{font:400 17px/1.2 var(--display)}
-  #card .wh{font-size:12px;color:var(--muted);margin-top:3px}
-  #card .tg{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+  /* nameplate: sits above the head with a tail pointing down at them */
+  #card{position:fixed;left:0;top:0;z-index:12;transform:translate(-50%,calc(-100% - 14px));
+    background:rgba(255,255,255,.97);border-radius:12px;padding:9px 13px;max-width:230px;
+    box-shadow:0 6px 22px rgba(0,0,0,.38);opacity:0;pointer-events:none;
+    transition:opacity .14s;text-align:center}
+  #card.on{opacity:1}
+  #card::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-9px;width:0;height:0;
+    border-left:9px solid transparent;border-right:9px solid transparent;
+    border-top:10px solid rgba(255,255,255,.97);
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18))}
+  #card .nm{font:400 16px/1.2 var(--display)}
+  #card .wh{font-size:11.5px;color:var(--muted);margin-top:2px}
+  #card .tg{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:7px}
   #card .tg span{font:600 9px/1 sans-serif;letter-spacing:.03em;padding:4px 6px;border-radius:3px}
 
   #bottom{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;gap:8px;align-items:center;
@@ -54966,11 +54972,21 @@ const ray=new Raycaster(), ptr=new Vector2();
 const card=document.getElementById('card');
 function tagColor(t){ let h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
   return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'}; }
+let picked=null;                                      /* nameplate follows this guest */
+const anchor=new Vector3();
+function placeCard(){
+  if(!picked){ return; }
+  anchor.set(picked.position.x,1.78,picked.position.z).project(camera);
+  if(anchor.z>1){ card.classList.remove('on'); return; }  /* behind the camera */
+  card.style.left=((anchor.x*0.5+0.5)*innerWidth)+'px';
+  card.style.top =((-anchor.y*0.5+0.5)*innerHeight)+'px';
+  card.classList.add('on');
+}
 function pick(cx,cy){
   ptr.x=(cx/innerWidth)*2-1; ptr.y=-(cy/innerHeight)*2+1;
   ray.setFromCamera(ptr,camera);
   const hit=ray.intersectObjects(people,true)[0];
-  if(!hit){ card.classList.remove('on'); return; }
+  if(!hit){ picked=null; card.classList.remove('on'); return; }
   let o=hit.object; while(o&&!o.userData.guest) o=o.parent;
   if(!o) return;
   const g=o.userData.guest, t=o.userData.seat.match(/t(\d+)/)[1], s=o.userData.seat.match(/s(\d+)/)[1];
@@ -54979,7 +54995,7 @@ function pick(cx,cy){
   const tg=document.getElementById('ctg'); tg.innerHTML='';
   g.tags.forEach(x=>{ const c=tagColor(x), e=document.createElement('span');
     e.textContent=x; e.style.background=c.bg; e.style.color=c.fg; tg.appendChild(e); });
-  card.classList.add('on');
+  picked=o; placeCard();
 }
 let downAt=null;
 renderer.domElement.addEventListener('pointerdown',e=>{downAt={x:e.clientX,y:e.clientY,t:Date.now()};});
@@ -55008,7 +55024,7 @@ goto('room',true);
 document.querySelectorAll('#views button').forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll('#views button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); goto(b.dataset.view); card.classList.remove('on');
+    b.classList.add('on'); goto(b.dataset.view); picked=null; card.classList.remove('on');
   };
 });
 
@@ -55027,6 +55043,7 @@ function tick(){
     if(anim.k>=1) anim=null;
   }
   controls.update();
+  placeCard();                       /* keep the nameplate over their head as the view moves */
   renderer.render(scene,camera);
 }
 tick();
