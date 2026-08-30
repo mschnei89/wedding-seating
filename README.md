@@ -22,6 +22,8 @@ Floor columns run `5/6/7`, `8/9/10`, `11/12/13`, `14/15/16`, with the first tabl
 
 Search by name or tag, filter to one tag, group by tag or sort A–Z, and hide guests already seated.
 
+**On a phone**, the guest list becomes a bottom sheet — tap **Guest list**, pick a name, and the sheet gets out of the way so you can tap a seat. A bar along the bottom shows who you're placing. The room opens scaled to fit; use **+** to zoom in far enough to tap comfortably, or **Roster view** to just read the tables as a list.
+
 ## Designs
 
 The page opens on a set of saved designs and lets you keep several side by side:
