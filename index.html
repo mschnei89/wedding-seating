@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Seating Chart</title>
+<style>
+  :root{
+    --paper:#faf7f2; --ink:#1c1a17; --muted:#7a7266; --line:#ddd5c8;
+    --gold:#c9a227; --goldsoft:#f0dfa0; --surface:#efe8db;
+    --seat:#ffffff; --seatfull:#141210; --seatlock:var(--gold);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink)}
+  .app{display:flex;height:100vh;overflow:hidden}
+
+  /* ---------- Left: guest list ---------- */
+  #side{width:330px;min-width:330px;border-right:1px solid var(--line);display:flex;flex-direction:column;background:#fff}
+  #side h1{font:600 16px/1.2 "Segoe UI",sans-serif;margin:0;padding:14px 14px 6px;letter-spacing:.02em}
+  #side .sub{padding:0 14px 10px;color:var(--muted);font-size:12px}
+  .ctrls{padding:0 14px 10px;display:flex;flex-direction:column;gap:8px}
+  .ctrls input,.ctrls select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+  .row{display:flex;gap:8px}
+  .row>*{flex:1}
+  label.chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:none}
+  #list{flex:1;overflow:auto;padding:0 8px 20px}
+  .grouphdr{position:sticky;top:0;background:#fff;padding:8px 6px 4px;font:600 11px/1 sans-serif;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--line);z-index:2}
+  .guest{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:grab;border:1px solid transparent}
+  .guest:hover{background:#f4f1ea}
+  .guest.sel{background:var(--goldsoft);border-color:var(--gold)}
+  .guest.seated{opacity:.45}
+  .guest .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .guest .seatno{font:600 10px/1 sans-serif;color:#fff;background:var(--seatfull);padding:3px 5px;border-radius:4px}
+  .guest.seated.locked .seatno{background:var(--gold);color:#241f10}
+  .tags{display:flex;gap:3px;flex:none}
+  .tag{font:600 9px/1 sans-serif;padding:3px 5px;border-radius:3px;white-space:nowrap;letter-spacing:.03em}
+
+  /* ---------- Right: chart ---------- */
+  #main{flex:1;overflow:auto;padding:22px 26px 60px}
+  .topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .topbar h2{margin:0;font:600 18px/1 sans-serif;letter-spacing:.02em}
+  .spacer{flex:1}
+  button{font:inherit;padding:6px 11px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer}
+  button:hover{background:#f4f1ea}
+  .hint{color:var(--muted);font-size:12px;margin:0 0 18px}
+  .dlab{font:600 10px/1 sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-left:6px}
+  #designsel{padding:6px 8px;border:1px solid var(--gold);border-radius:6px;font:inherit;background:#fffdf6;
+    min-width:160px;max-width:240px}
+  .stamp{font-size:11px;color:#a99f8d;font-style:italic}
+  #printtitle{display:none}
+
+  .zone{margin-bottom:34px}
+  .zonelab{font:600 11px/1 sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px}
+
+  .headrow{display:flex;justify-content:flex-start}
+  .htable{display:flex;flex-direction:column;align-items:center}
+  .vtable{display:flex;flex-direction:row;align-items:center}
+  .surface{background:var(--surface);border:1px solid #cdc3b1;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:2px;color:#8a8172;font:600 11px/1.1 sans-serif;text-align:center}
+  .htable .surface{width:186px;height:62px}
+  .htable:not(:last-child) .surface{border-right:none}
+  .vtable .surface{width:62px;height:186px}
+  .vcol .vtable:not(:last-child) .surface{border-bottom:none}
+  .surface .cnt{font:400 10px/1 sans-serif;color:#a99f8d}
+  .seatrow{display:flex;gap:22px;padding:5px 0}
+  .seatcol{display:flex;flex-direction:column;gap:22px;padding:0 5px}
+
+  .grid{display:flex;gap:52px;flex-wrap:wrap}
+  .vcol{display:flex;flex-direction:column}
+
+  .seat{width:34px;height:34px;border-radius:50%;border:1.5px solid #b9ae9a;background:var(--seat);
+    display:flex;align-items:center;justify-content:center;font:600 10px/1 sans-serif;color:#b0a692;
+    cursor:pointer;user-select:none;transition:transform .08s}
+  .seat:hover{transform:scale(1.12);border-color:var(--gold)}
+  .seat.full{background:var(--seatfull);color:#fff;border-color:var(--seatfull)}
+  .seat.locked{background:var(--seatlock);color:#241f10;border-color:#a5831a}
+  .seat.drop{outline:2px dashed var(--gold);outline-offset:2px}
+
+  /* popover */
+  #pop{position:absolute;z-index:50;background:#fff;border:1px solid var(--line);border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.15);padding:10px;min-width:190px;display:none}
+  #pop .pname{font-weight:600;margin-bottom:2px}
+  #pop .ptags{display:flex;gap:3px;flex-wrap:wrap;margin:6px 0 8px}
+  #pop .pbtns{display:flex;gap:6px}
+  #pop button{flex:1;padding:5px 6px;font-size:12px}
+
+  #tip{position:fixed;z-index:60;background:#1c1a17;color:#fff;padding:5px 8px;border-radius:5px;
+    font-size:12px;pointer-events:none;display:none;max-width:260px}
+  #tip .tt{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+
+  #roster{display:none;margin-top:10px}
+  #roster.on{display:block}
+  .rtable{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;margin-bottom:8px}
+  .rtable h4{margin:0 0 6px;font:600 12px/1 sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .rtable ol{margin:0;padding-left:20px;font-size:13px}
+  .rcols{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+
+  @media print{
+    #side,.topbar,.hint{display:none}
+    #main{overflow:visible}
+    #printtitle{display:block;font:600 15px/1 sans-serif;letter-spacing:.04em;margin:0 0 18px;color:var(--muted)}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside id="side">
+    <h1>Guest List</h1>
+    <div class="sub"><span id="counts"></span></div>
+    <div class="ctrls">
+      <input id="search" type="search" placeholder="Search name or tag...">
+      <div class="row">
+        <select id="tagfilter"><option value="">All tags</option></select>
+        <select id="sortby">
+          <option value="tag">Group by tag</option>
+          <option value="name">Sort A-Z</option>
+        </select>
+      </div>
+      <div class="row" style="align-items:center">
+        <label class="chk"><input type="checkbox" id="hideseated"> Hide seated</label>
+        <button id="clearsel" style="flex:none">Clear selection</button>
+      </div>
+    </div>
+    <div id="list"></div>
+  </aside>
+
+  <main id="main">
+    <div class="topbar">
+      <h2>Seating Chart</h2>
+      <span class="dlab">Design</span>
+      <select id="designsel" title="Switch between saved designs"></select>
+      <button id="btnnew" title="Start a new, empty design">New</button>
+      <button id="btnsaveas" title="Save this arrangement as a new named design">Save as</button>
+      <button id="btnrename">Rename</button>
+      <button id="btndelete">Delete</button>
+      <span id="dstamp" class="stamp"></span>
+      <span class="spacer"></span>
+      <button id="btnroster">Roster view</button>
+      <button id="btnexport">Export JSON</button>
+      <button id="btnimport">Import JSON</button>
+      <button id="btnprint">Print</button>
+      <button id="btnreset">Clear seats</button>
+    </div>
+    <div id="printtitle"></div>
+    <p class="hint">Click a guest, then click a seat &nbsp;&middot;&nbsp; or drag a name onto a seat &nbsp;&middot;&nbsp;
+      drag seat&rarr;seat to swap &nbsp;&middot;&nbsp; right-click a seat to lock/unlock.
+      <b>White</b> = empty, <b>black</b> = filled, <b>gold</b> = locked.</p>
+
+    <div class="zone">
+      <div class="zonelab">Head Table &nbsp;&mdash; tables 1&ndash;4</div>
+      <div class="headrow" id="headrow"></div>
+    </div>
+
+    <div class="zone">
+      <div class="zonelab">Floor &nbsp;&mdash; tables 5&ndash;16</div>
+      <div class="grid" id="floor"></div>
+    </div>
+
+    <div id="roster"><div class="rcols" id="rostercols"></div></div>
+  </main>
+</div>
+
+<div id="pop"></div>
+<div id="tip"></div>
+<input type="file" id="fileinput" accept="application/json" style="display:none">
+
+<script>
+/* ============ guest data (from Guest_List_Tagged.csv) ============ */
+const CSV = `name,Tag 1,Tag 2,Tag 3
+Mark Schneider,couple,groom,mark family
+Ann-Sophie Van Backlé,couple,bride,belgian
+Joost Van Backlé,belgian,,parents
+Veronique Tylleman,belgian,,parents
+DirkVan Eyken,belgian,,
+Hilde Van Eyken,belgian,,
+Koen Van Eyken,belgian,,
+Liesbeth Roelants,belgian,,
+Jan Van Backlé,belgian,,
+Anne Brouwers,belgian,,
+Patricia (Tylleman),belgian,,
+Patrick Tylleman,belgian,,
+Andrew Gatewood,BU,,
+Amanda Gatewood,BU,,
+Ian Kosmaczewski,BU,NYC,
+Kate Kosmaczewski,BU,NYC,
+Brandon Maxwell,camping,,
+Andy Moriarty,camping,,
+Ali Wood,camping,,
+Pete Milne,church,,
+Bekah Milne,church,,
+Canyon Law,church,finance bro,
+Sarah Eby,church,finance bro,
+Josh Rigby,church,,
+Lilly Rigby,church,,
+Samuel Veltkamp,church,,
+Erin Veltkamp,church,,
+MC Wilson,church,finance bro,
+Levin Wilson,church,finance bro,
+Taylor Mcallum,church,,
+Mark Mcallum,church,,
+Michael Franklin,CU,,knows gatewood
+Taylor Hartley,CU,,knows gatewood
+Austin Masket,CU,,
+Lizz Masket,CU,,
+Ryan Saunders,danville,,
+Pete Rodrik,danville church,joost friend,
+Amy Rodrik,danville church,joost friend,
+Paul Knight,DC,NYC,finance bro
+Sammie Knight,DC,NYC,finance bro
+Karin Wollschlaeger,doctor,,
+Jen Huynh,doctor,,
+Eddie Zhou,doctor,,
+Anna Davids,doctor,,
+Eric Davids,doctor,,
+Sarah Hagerman,main,camping,finance bro
+Sean Hagerman,main,camping,finance bro
+Laura Moodley,main,camping,
+Nick Moodley,main,camping,
+Skyler Pinna,main,BU,finance bro
+Anna Scalamogna,main,BU,finance bro
+Alex LePore,main,DC,finance bro
+Michela LePore,main,DC,finance bro
+Drew Van Der Werff,main,DC,finance bro
+Brittney Van Der Werff,main,DC,finance bro
+Janelle Roullier,main,danville,
+Mark Roullier,main,danville,
+Courtney Roth,main,danville,
+Jim Roth,main,danville,
+Megan Teevans,main,danville,
+Nicole Madden,main,danville,
+Tyler Madden,main,danville,
+Kelsi Trautwein,main,PLNU,
+Ryan Trautwein,main,PLNU,
+Iris Burgard,main,doctor,
+Tanner Burgard,main,doctor,
+Sarah McMahon,main,doctor,
+Matt McMahon,main,doctor,
+Hannah Mason,main,church,
+Jeff Mason,main,church,
+Mary Van Backlé,main,danville,
+Pauline Potocnik,main,Danville,
+Michael Potocnik,main,Danville,
+David Ouzts,mark camping,,
+MK Ouzts,mark camping,,
+Mary Schneider,Mark family,parents,
+Helmut Schneider,mark family,parents,
+Caroline Schneider,mark family,parents,
+Jessie Cottage,mark family,parents,
+Cory Albrechtsen,med school,,
+Craig Hicks,med school,,
+Mackenzie Goodrich,med school,,
+Joshua von Allworden,med school,,
+Cory Payne,med school,,
+Selena Payne,med school,,
+Kimberly Lugo,resident doctor,,
+Liana Mathias,resident doctor,,
+Robin Holby,resident doctor,,
+Mandy Ortiz,resident doctor,,
+Andrew Tannous,resident doctor,,
+Zach Tompers,skeena,,
+Rachael Blondy,skeena,,
+Ryan Kropp,skeena,,
+Amy Potter,skeena,,`;
+
+const guests = CSV.trim().split(/\r?\n/).slice(1).map(function(line,i){
+  var c = line.split(',');
+  return {
+    id:'g'+i,
+    name:(c[0]||'').trim(),
+    tags:c.slice(1).map(function(t){return (t||'').trim().toLowerCase();}).filter(Boolean)
+  };
+});
+const byId = Object.fromEntries(guests.map(function(g){return [g.id,g];}));
+
+/* deterministic color per tag */
+const allTags=[...new Set(guests.flatMap(function(g){return g.tags;}))].sort();
+function tagColor(t){
+  var h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
+  return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'};
+}
+function tagEl(t){
+  var c=tagColor(t), s=document.createElement('span');
+  s.className='tag'; s.textContent=t; s.style.background=c.bg; s.style.color=c.fg; return s;
+}
+
+/* ============ tables ============ */
+const tables=[];
+for(let i=1;i<=4;i++)  tables.push({id:i,orient:'h'});
+for(let i=5;i<=16;i++) tables.push({id:i,orient:'v'});
+function seatId(t,s){return 't'+t+'s'+s;}
+
+/* ============ designs + state ============ */
+const KEY='wedding-seating-v2';
+const OLDKEY='wedding-seating-v1';
+/* Starting designs baked into the page, so a first-time visitor sees the real
+   plans instead of an empty room. Their own edits then live in their browser. */
+const SEED = /*SEED-START*/{"current":"Option D - your notes","designs":{"Head table (locked)":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788113529512},"Option A - by circle":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46","t2s5":"g77","t2s6":"g78","t4s2":"g2","t4s5":"g3","t4s3":"g76","t4s6":"g75","t5s1":"g49","t5s4":"g50","t5s2":"g64","t5s5":"g65","t5s3":"g66","t5s6":"g67","t6s1":"g73","t6s4":"g74","t6s2":"g16","t6s5":"g17","t6s3":"g18","t7s1":"g43","t7s4":"g44","t7s2":"g40","t7s5":"g41","t7s3":"g42","t7s6":"g89","t8s1":"g60","t8s4":"g61","t8s2":"g62","t8s5":"g63","t8s3":"g59","t8s6":"g35","t9s1":"g4","t9s4":"g5","t9s2":"g6","t9s5":"g7","t9s3":"g8","t9s6":"g9","t10s1":"g90","t10s4":"g91","t10s2":"g85","t10s5":"g86","t10s3":"g87","t10s6":"g88","t11s1":"g19","t11s4":"g20","t11s2":"g23","t11s5":"g24","t11s3":"g29","t11s6":"g30","t12s1":"g10","t12s4":"g11","t12s2":"g36","t12s5":"g37","t12s3":"g25","t12s6":"g26","t13s1":"g83","t13s4":"g84","t13s2":"g79","t13s5":"g80","t13s3":"g81","t13s6":"g82","t14s1":"g21","t14s4":"g22","t14s2":"g27","t14s5":"g28","t14s3":"g68","t14s6":"g69","t15s1":"g12","t15s4":"g13","t15s2":"g14","t15s5":"g15","t15s3":"g38","t15s6":"g39","t16s1":"g31","t16s4":"g32","t16s2":"g33","t16s5":"g34","t16s3":"g92","t16s6":"g93"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788113529512},"Option B - mix & mingle":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46","t2s5":"g77","t2s6":"g78","t4s2":"g2","t4s5":"g3","t4s3":"g76","t4s6":"g75","t5s1":"g21","t5s4":"g22","t5s2":"g27","t5s5":"g28","t5s3":"g38","t5s6":"g39","t6s1":"g64","t6s4":"g65","t6s2":"g66","t6s5":"g67","t6s3":"g43","t6s6":"g44","t7s1":"g25","t7s4":"g26","t7s2":"g29","t7s5":"g30","t7s3":"g49","t7s6":"g50","t8s1":"g12","t8s4":"g13","t8s2":"g31","t8s5":"g32","t8s3":"g14","t8s6":"g15","t9s1":"g73","t9s4":"g74","t9s2":"g16","t9s5":"g17","t9s3":"g18","t9s6":"g59","t10s1":"g4","t10s4":"g5","t10s2":"g6","t10s5":"g7","t10s3":"g8","t10s6":"g9","t11s1":"g40","t11s4":"g41","t11s2":"g42","t11s5":"g79","t11s3":"g80","t11s6":"g81","t12s1":"g90","t12s4":"g91","t12s2":"g92","t12s5":"g93","t12s3":"g62","t12s6":"g63","t13s1":"g10","t13s4":"g11","t13s2":"g36","t13s5":"g37","t13s3":"g33","t13s6":"g34","t14s1":"g85","t14s4":"g86","t14s2":"g87","t14s5":"g88","t14s3":"g89","t14s6":"g82","t15s1":"g19","t15s4":"g20","t15s2":"g23","t15s5":"g24","t15s3":"g68","t15s6":"g69","t16s1":"g83","t16s4":"g84","t16s2":"g60","t16s5":"g61","t16s3":"g35"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788113529512},"Option C - concentric":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46","t2s5":"g77","t2s6":"g78","t4s2":"g2","t4s5":"g3","t4s3":"g76","t4s6":"g75","t5s1":"g4","t5s4":"g5","t5s2":"g6","t5s5":"g7","t5s3":"g8","t5s6":"g9","t6s1":"g73","t6s4":"g74","t6s2":"g59","t6s5":"g16","t6s3":"g17","t6s6":"g18","t7s1":"g31","t7s4":"g32","t7s2":"g33","t7s5":"g34","t7s3":"g92","t7s6":"g93","t8s1":"g10","t8s4":"g11","t8s2":"g36","t8s5":"g37","t8s3":"g35","t9s1":"g19","t9s4":"g20","t9s2":"g23","t9s5":"g24","t9s3":"g25","t9s6":"g26","t10s1":"g90","t10s4":"g91","t10s2":"g40","t10s5":"g41","t10s3":"g42","t10s6":"g89","t11s1":"g49","t11s4":"g50","t11s2":"g64","t11s5":"g65","t11s3":"g66","t11s6":"g67","t12s1":"g21","t12s4":"g22","t12s2":"g27","t12s5":"g28","t12s3":"g29","t12s6":"g30","t13s1":"g43","t13s4":"g44","t13s2":"g85","t13s5":"g86","t13s3":"g87","t13s6":"g88","t14s1":"g60","t14s4":"g61","t14s2":"g62","t14s5":"g63","t14s3":"g68","t14s6":"g69","t15s1":"g12","t15s4":"g13","t15s2":"g14","t15s5":"g15","t15s3":"g38","t15s6":"g39","t16s1":"g83","t16s4":"g84","t16s2":"g79","t16s5":"g80","t16s3":"g81","t16s6":"g82"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788113529513},"Option D - your notes":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46","t4s2":"g8","t4s5":"g9","t4s3":"g10","t4s6":"g11","t4s4":"g35","t5s1":"g12","t5s4":"g13","t5s2":"g14","t5s5":"g15","t5s3":"g31","t5s6":"g32","t6s1":"g73","t6s4":"g74","t6s2":"g16","t6s5":"g17","t6s3":"g18","t6s6":"g59","t7s1":"g19","t7s4":"g20","t7s2":"g23","t7s5":"g24","t7s3":"g25","t7s6":"g26","t8s1":"g2","t8s4":"g3","t8s2":"g76","t8s5":"g75","t8s3":"g77","t8s6":"g78","t9s1":"g4","t9s4":"g5","t9s2":"g6","t9s5":"g7","t9s3":"g36","t9s6":"g37","t10s1":"g21","t10s4":"g22","t10s2":"g27","t10s5":"g28","t10s3":"g29","t10s6":"g30","t11s1":"g60","t11s4":"g61","t11s2":"g62","t11s5":"g63","t11s3":"g68","t11s6":"g69","t12s1":"g33","t12s4":"g34","t12s2":"g49","t12s5":"g50","t12s3":"g38","t12s6":"g39","t13s1":"g90","t13s4":"g91","t13s2":"g92","t13s5":"g93","t13s3":"g66","t13s6":"g67","t14s1":"g43","t14s4":"g44","t14s2":"g64","t14s5":"g65","t14s3":"g40","t14s6":"g41","t15s1":"g83","t15s4":"g84","t15s2":"g79","t15s5":"g80","t15s3":"g81","t15s6":"g82","t16s1":"g85","t16s4":"g86","t16s2":"g87","t16s5":"g88","t16s3":"g89","t16s6":"g42"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788113529513}}}/*SEED-END*/;
+function blank(){return {assign:{},locked:{},updated:Date.now()};}
+function freshStore(){
+  if(SEED && SEED.designs) return JSON.parse(JSON.stringify(SEED));
+  return {current:'design1',designs:{design1:blank()}};
+}
+
+var store=freshStore();
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){
+    store=JSON.parse(raw);
+  }else{
+    var old=localStorage.getItem(OLDKEY);          /* migrate the single-design version */
+    if(old){
+      var o=JSON.parse(old);
+      store.designs.design1={assign:o.assign||{},locked:o.locked||{},updated:Date.now()};
+    }
+  }
+}catch(e){ store=freshStore(); }
+if(!store || !store.designs || !Object.keys(store.designs).length) store=freshStore();
+if(!store.designs[store.current]) store.current=Object.keys(store.designs)[0];
+
+let state=store.designs[store.current];
+if(!state.assign) state.assign={};
+if(!state.locked) state.locked={};
+let selected=null;
+
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+function save(){ state.updated=Date.now(); store.designs[store.current]=state; persist(); }
+function clone(d){return {assign:Object.assign({},d.assign),locked:Object.assign({},d.locked),updated:Date.now()};}
+
+function switchDesign(name){
+  if(!store.designs[name]) return;
+  store.current=name; state=store.designs[name];
+  if(!state.assign) state.assign={};
+  if(!state.locked) state.locked={};
+  selected=null; persist(); render();
+}
+function uniqueName(base){
+  var n=base,i=2;
+  while(store.designs[n]) n=base+' '+(i++);
+  return n;
+}
+function newDesign(){
+  var n=prompt('Name for the new, empty design:', uniqueName('design'+(Object.keys(store.designs).length+1)));
+  if(n===null) return;
+  n=n.trim(); if(!n) return;
+  if(store.designs[n] && !confirm('"'+n+'" already exists. Replace it with an empty design?')) return;
+  store.designs[n]=blank(); switchDesign(n);
+}
+function saveAsDesign(){
+  var n=prompt('Save this arrangement as a new design named:', uniqueName(store.current+' copy'));
+  if(n===null) return;
+  n=n.trim(); if(!n) return;
+  if(store.designs[n] && !confirm('"'+n+'" already exists. Overwrite it?')) return;
+  store.designs[n]=clone(state); switchDesign(n);
+}
+function renameDesign(){
+  var n=prompt('Rename "'+store.current+'" to:', store.current);
+  if(n===null) return;
+  n=n.trim(); if(!n || n===store.current) return;
+  if(store.designs[n] && !confirm('"'+n+'" already exists. Overwrite it?')) return;
+  store.designs[n]=state; delete store.designs[store.current]; switchDesign(n);
+}
+function deleteDesign(){
+  var names=Object.keys(store.designs);
+  if(names.length===1) return flash('That is your only design — use Clear seats instead.');
+  if(!confirm('Delete the design "'+store.current+'"? This cannot be undone.')) return;
+  delete store.designs[store.current];
+  switchDesign(Object.keys(store.designs)[0]);
+}
+function renderDesigns(){
+  var sel=document.getElementById('designsel');
+  sel.innerHTML='';
+  Object.keys(store.designs).sort(function(a,b){return a.localeCompare(b,undefined,{numeric:true});})
+    .forEach(function(n){
+      var seated=Object.keys(store.designs[n].assign||{}).length;
+      var o=document.createElement('option');
+      o.value=n; o.textContent=n+'  ('+seated+' seated)';
+      if(n===store.current) o.selected=true;
+      sel.appendChild(o);
+    });
+  document.getElementById('printtitle').textContent=store.current;
+  var u=state.updated?new Date(state.updated):null;
+  document.getElementById('dstamp').textContent = u
+    ? 'auto-saved '+u.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})
+    : 'auto-saved';
+}
+function seatOf(gid){return Object.keys(state.assign).find(function(s){return state.assign[s]===gid;})||null;}
+function initials(n){
+  return n.replace(/[()]/g,'').split(/\s+/).filter(Boolean)
+          .map(function(w){return w[0];}).join('').slice(0,3).toUpperCase();
+}
+
+/* ============ build chart ============ */
+function makeSeat(t,s){
+  var d=document.createElement('div');
+  d.className='seat'; d.dataset.seat=seatId(t,s); d.draggable=true;
+  d.addEventListener('click',onSeatClick);
+  d.addEventListener('contextmenu',function(e){e.preventDefault();toggleLock(d.dataset.seat);});
+  d.addEventListener('mouseenter',showTip);
+  d.addEventListener('mousemove',moveTip);
+  d.addEventListener('mouseleave',hideTip);
+  d.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/seat',d.dataset.seat);});
+  d.addEventListener('dragover',function(e){e.preventDefault();d.classList.add('drop');});
+  d.addEventListener('dragleave',function(){d.classList.remove('drop');});
+  d.addEventListener('drop',function(e){
+    e.preventDefault(); d.classList.remove('drop');
+    var g=e.dataTransfer.getData('text/guest'), from=e.dataTransfer.getData('text/seat');
+    if(g) place(g,d.dataset.seat); else if(from) swapSeats(from,d.dataset.seat);
+  });
+  return d;
+}
+function surface(t){
+  var s=document.createElement('div'); s.className='surface';
+  s.innerHTML='<div>Table '+t+'</div><div class="cnt" data-cnt="'+t+'">0 / 6</div>';
+  return s;
+}
+function hTable(t){
+  var w=document.createElement('div'); w.className='htable';
+  var top=document.createElement('div'); top.className='seatrow';
+  [1,2,3].forEach(function(i){top.appendChild(makeSeat(t,i));});
+  var bot=document.createElement('div'); bot.className='seatrow';
+  [4,5,6].forEach(function(i){bot.appendChild(makeSeat(t,i));});
+  w.append(top,surface(t),bot); return w;
+}
+function vTable(t){
+  var w=document.createElement('div'); w.className='vtable';
+  var left=document.createElement('div'); left.className='seatcol';
+  [1,2,3].forEach(function(i){left.appendChild(makeSeat(t,i));});
+  var right=document.createElement('div'); right.className='seatcol';
+  [4,5,6].forEach(function(i){right.appendChild(makeSeat(t,i));});
+  w.append(left,surface(t),right); return w;
+}
+var headrow=document.getElementById('headrow');
+[1,2,3,4].forEach(function(t){headrow.appendChild(hTable(t));});
+var floor=document.getElementById('floor');
+for(let c=0;c<4;c++){
+  var col=document.createElement('div'); col.className='vcol';
+  for(let r=0;r<3;r++) col.appendChild(vTable(5+c*3+r));
+  floor.appendChild(col);
+}
+
+/* ============ actions ============ */
+function place(gid,sid){
+  if(state.locked[sid]) return flash('That seat is locked.');
+  var prev=seatOf(gid);
+  var sitting=state.assign[sid];
+  if(prev) delete state.assign[prev];
+  if(sitting && prev) state.assign[prev]=sitting;   /* true swap */
+  state.assign[sid]=gid;
+  selected=null; save(); render();
+}
+function swapSeats(a,b){
+  if(a===b) return;
+  if(state.locked[a]||state.locked[b]) return flash('One of those seats is locked.');
+  var ga=state.assign[a], gb=state.assign[b];
+  if(gb) state.assign[a]=gb; else delete state.assign[a];
+  if(ga) state.assign[b]=ga; else delete state.assign[b];
+  save(); render();
+}
+function unassign(sid){
+  if(state.locked[sid]) return flash('Unlock the seat first.');
+  delete state.assign[sid]; save(); render();
+}
+function toggleLock(sid){
+  if(!state.assign[sid] && !state.locked[sid]) return flash('Only filled seats can be locked.');
+  if(state.locked[sid]) delete state.locked[sid]; else state.locked[sid]=true;
+  save(); render();
+}
+function onSeatClick(e){
+  var sid=e.currentTarget.dataset.seat;
+  if(selected){ place(selected,sid); return; }
+  if(state.assign[sid]) openPop(e.currentTarget,sid);
+}
+
+/* ============ popover ============ */
+var pop=document.getElementById('pop');
+function openPop(el,sid){
+  var g=byId[state.assign[sid]];
+  pop.innerHTML='';
+  var n=document.createElement('div'); n.className='pname'; n.textContent=g.name;
+  var w=document.createElement('div'); w.style.cssText='font-size:12px;color:#7a7266';
+  w.textContent='Table '+sid.match(/t(\d+)/)[1]+' · seat '+sid.match(/s(\d+)/)[1];
+  var tg=document.createElement('div'); tg.className='ptags';
+  g.tags.forEach(function(t){tg.appendChild(tagEl(t));});
+  var b=document.createElement('div'); b.className='pbtns';
+  var lk=document.createElement('button'); lk.textContent=state.locked[sid]?'Unlock':'Lock';
+  lk.onclick=function(){toggleLock(sid);closePop();};
+  var rm=document.createElement('button'); rm.textContent='Remove';
+  rm.onclick=function(){unassign(sid);closePop();};
+  b.append(lk,rm); pop.append(n,w,tg,b);
+  var r=el.getBoundingClientRect();
+  pop.style.display='block';
+  pop.style.left=(r.left+window.scrollX+r.width+8)+'px';
+  pop.style.top=(r.top+window.scrollY-6)+'px';
+}
+function closePop(){pop.style.display='none';}
+document.addEventListener('click',function(e){
+  if(!pop.contains(e.target)&&!e.target.classList.contains('seat')) closePop();
+});
+
+/* ============ tooltip ============ */
+var tip=document.getElementById('tip');
+function showTip(e){
+  var sid=e.currentTarget.dataset.seat, gid=state.assign[sid];
+  var t=sid.match(/t(\d+)/)[1], s=sid.match(/s(\d+)/)[1];
+  tip.innerHTML='';
+  var h=document.createElement('div');
+  if(gid){
+    h.innerHTML='<b></b><br><span style="opacity:.7">Table '+t+' · seat '+s+
+                (state.locked[sid]?' · locked':'')+'</span>';
+    h.querySelector('b').textContent=byId[gid].name;
+  }else{
+    h.innerHTML='<span style="opacity:.85">Table '+t+' · seat '+s+' — empty</span>';
+  }
+  tip.appendChild(h);
+  if(gid){
+    var d=document.createElement('div'); d.className='tt';
+    byId[gid].tags.forEach(function(x){d.appendChild(tagEl(x));});
+    tip.appendChild(d);
+  }
+  tip.style.display='block'; moveTip(e);
+}
+function moveTip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+16)+'px';}
+function hideTip(){tip.style.display='none';}
+var hintEl=document.querySelector('.hint'), hintHTML=hintEl.innerHTML, hintTimer=null;
+function flash(msg){
+  hintEl.innerHTML='<b style="color:#a5831a">'+msg+'</b>';
+  clearTimeout(hintTimer);
+  hintTimer=setTimeout(function(){hintEl.innerHTML=hintHTML;},1800);
+}
+
+/* ============ render ============ */
+function render(){
+  document.querySelectorAll('.seat').forEach(function(el){
+    var sid=el.dataset.seat, gid=state.assign[sid];
+    el.classList.toggle('full',!!gid && !state.locked[sid]);
+    el.classList.toggle('locked',!!state.locked[sid]);
+    el.textContent = gid ? initials(byId[gid].name) : '';
+  });
+  tables.forEach(function(t){
+    var n=[1,2,3,4,5,6].filter(function(s){return state.assign[seatId(t.id,s)];}).length;
+    var el=document.querySelector('[data-cnt="'+t.id+'"]');
+    if(el) el.textContent=n+' / 6';
+  });
+  renderList(); renderRoster(); renderDesigns();
+}
+
+/* ============ guest list ============ */
+var listEl=document.getElementById('list');
+var searchEl=document.getElementById('search');
+var tagFilterEl=document.getElementById('tagfilter');
+var sortEl=document.getElementById('sortby');
+var hideEl=document.getElementById('hideseated');
+allTags.forEach(function(t){
+  var o=document.createElement('option'); o.value=t; o.textContent=t; tagFilterEl.appendChild(o);
+});
+[searchEl,tagFilterEl,sortEl,hideEl].forEach(function(el){el.addEventListener('input',renderList);});
+document.getElementById('clearsel').onclick=function(){selected=null;renderList();};
+
+function guestRow(g){
+  var sid=seatOf(g.id);
+  var d=document.createElement('div');
+  d.className='guest'+(selected===g.id?' sel':'')+(sid?' seated':'')+(sid&&state.locked[sid]?' locked':'');
+  d.draggable=true;
+  d.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/guest',g.id);});
+  d.onclick=function(){selected=(selected===g.id)?null:g.id; renderList();};
+  var n=document.createElement('div'); n.className='nm'; n.textContent=g.name;
+  var tg=document.createElement('div'); tg.className='tags';
+  g.tags.forEach(function(t){tg.appendChild(tagEl(t));});
+  d.append(n,tg);
+  if(sid){
+    var b=document.createElement('span'); b.className='seatno';
+    b.textContent='T'+sid.match(/t(\d+)/)[1]+'·'+sid.match(/s(\d+)/)[1];
+    d.appendChild(b);
+  }
+  return d;
+}
+function renderList(){
+  var q=searchEl.value.trim().toLowerCase(), ft=tagFilterEl.value, hide=hideEl.checked;
+  var rows=guests.filter(function(g){
+    if(hide && seatOf(g.id)) return false;
+    if(ft && g.tags.indexOf(ft)<0) return false;
+    if(q && !(g.name.toLowerCase().indexOf(q)>=0 || g.tags.some(function(t){return t.indexOf(q)>=0;}))) return false;
+    return true;
+  });
+  listEl.innerHTML='';
+  if(sortEl.value==='name'){
+    rows.slice().sort(function(a,b){return a.name.localeCompare(b.name);})
+        .forEach(function(g){listEl.appendChild(guestRow(g));});
+  }else{
+    var groups={};
+    rows.forEach(function(g){var k=g.tags[0]||'(untagged)';(groups[k]=groups[k]||[]).push(g);});
+    Object.keys(groups).sort().forEach(function(k){
+      var h=document.createElement('div'); h.className='grouphdr';
+      h.textContent=k+' · '+groups[k].length; listEl.appendChild(h);
+      groups[k].forEach(function(g){listEl.appendChild(guestRow(g));});
+    });
+  }
+  var seated=Object.keys(state.assign).length;
+  document.getElementById('counts').textContent =
+    guests.length+' guests · '+seated+' seated · '+(guests.length-seated)+' to place · 96 seats';
+}
+
+/* ============ roster ============ */
+function renderRoster(){
+  var box=document.getElementById('rostercols'); box.innerHTML='';
+  tables.forEach(function(t){
+    var d=document.createElement('div'); d.className='rtable';
+    var h=document.createElement('h4'); h.textContent='Table '+t.id+(t.id<=4?' (head)':'');
+    var ol=document.createElement('ol');
+    [1,2,3,4,5,6].forEach(function(s){
+      var g=state.assign[seatId(t.id,s)];
+      var li=document.createElement('li'); li.textContent=g?byId[g].name:'—';
+      ol.appendChild(li);
+    });
+    d.append(h,ol); box.appendChild(d);
+  });
+}
+
+/* ============ toolbar ============ */
+document.getElementById('btnroster').onclick=function(){
+  document.getElementById('roster').classList.toggle('on');
+};
+document.getElementById('btnprint').onclick=function(){window.print();};
+document.getElementById('btnreset').onclick=function(){
+  if(confirm('Clear every seat assignment and lock in "'+store.current+'"?')){
+    state=blank(); store.designs[store.current]=state; persist(); render();
+  }
+};
+document.getElementById('designsel').onchange=function(e){switchDesign(e.target.value);};
+document.getElementById('btnnew').onclick=newDesign;
+document.getElementById('btnsaveas').onclick=saveAsDesign;
+document.getElementById('btnrename').onclick=renameDesign;
+document.getElementById('btndelete').onclick=deleteDesign;
+
+document.getElementById('btnexport').onclick=function(){
+  var out={format:'wedding-seating',version:2,current:store.current,designs:store.designs};
+  var blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='seating-designs.json'; a.click();
+};
+var fi=document.getElementById('fileinput');
+document.getElementById('btnimport').onclick=function(){fi.click();};
+fi.onchange=function(){
+  var f=fi.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result);
+      if(d && d.designs){                        /* full export: merge every design in */
+        Object.keys(d.designs).forEach(function(n){
+          var target=store.designs[n] ? uniqueName(n+' (imported)') : n;
+          store.designs[target]=d.designs[n];
+        });
+        switchDesign(d.current && store.designs[d.current] ? d.current : Object.keys(store.designs)[0]);
+      }else if(d && d.assign){                   /* single design (or an old v1 file) */
+        var n=uniqueName(f.name.replace(/\.json$/i,'')||'imported');
+        store.designs[n]={assign:d.assign,locked:d.locked||{},updated:Date.now()};
+        switchDesign(n);
+      }else{ alert('That file does not look like a seating design.'); return; }
+      persist();
+    }catch(e){ alert('Could not read that file.'); }
+  };
+  r.readAsText(f);
+  fi.value='';
+};
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){selected=null;closePop();renderList();}
+});
+
+render();
+</script>
+</body>
+</html>
