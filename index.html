@@ -9,6 +9,7 @@
     --paper:#faf7f2; --ink:#1c1a17; --muted:#7a7266; --line:#ddd5c8;
     --gold:#c9a227; --goldsoft:#f0dfa0; --surface:#efe8db;
     --seat:#ffffff; --seatfull:#141210; --seatlock:var(--gold);
+    --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
   }
   *{box-sizing:border-box}
   body{margin:0;font:14px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink)}
@@ -102,49 +103,110 @@
   #planwrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
   #plan{transform-origin:top left;width:max-content}
 
-  /* ---------- mobile sheet + bottom bar (hidden on desktop) ---------- */
+  /* ---------- mobile app shell (hidden on desktop) ---------- */
   #sheetbar{display:none}
   #mobar{display:none}
+  #mohead{display:none}
+  #moscrim{display:none}
+  .sheet{display:none}
   .mobonly{display:none}
 
   @media (max-width:860px){
     .app{display:block;height:auto;overflow:visible}
-    body{overflow-x:hidden}
-    #main{padding:14px 12px 86px;overflow:visible}
-    .topbar{gap:6px}
-    .topbar h2{font-size:16px;width:100%}
-    .topbar button{padding:5px 9px;font-size:13px}
-    #designsel{min-width:0;flex:1 1 150px;max-width:none}
-    .dlab,#dstamp{display:none}
-    .spacer{display:none}
-    .hint{font-size:11px;margin-bottom:12px}
+    body{overflow-x:hidden;background:var(--paper)}
+    #main{padding:0 0 92px;overflow:visible}
+    .topbar,.hint,#printtitle{display:none}   /* replaced by the app header */
     .deskonly{display:none}
     .mobonly{display:inline}
     .seat{width:38px;height:38px}     /* bigger targets to survive being scaled down */
 
-    /* guest list becomes a bottom sheet */
-    #side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;min-width:0;height:76vh;
-      border-right:none;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
-      box-shadow:0 -10px 34px rgba(0,0,0,.22);z-index:40;
-      transform:translateY(100%);transition:transform .22s ease}
+    /* --- slim app header --- */
+    #mohead{display:block;position:sticky;top:0;z-index:25;background:rgba(250,247,242,.92);
+      backdrop-filter:saturate(1.6) blur(10px);-webkit-backdrop-filter:saturate(1.6) blur(10px);
+      border-bottom:1px solid var(--line);padding:12px 16px 0}
+    .mohead-top{display:flex;align-items:center;gap:12px}
+    .monames{font:400 19px/1.15 var(--display);letter-spacing:.01em;color:var(--ink)}
+    .modesign{display:flex;align-items:center;gap:5px;margin-top:2px;padding:0;border:none;background:none;
+      font:500 12px/1.3 "Segoe UI",sans-serif;color:var(--muted);letter-spacing:.02em}
+    .modesign .caret{color:var(--gold);font-size:10px}
+    .iconbtn{margin-left:auto;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+      background:#fff;font-size:17px;line-height:1;color:var(--ink);display:grid;place-items:center;flex:none}
+
+    /* --- segmented Chart / Roster --- */
+    .moseg{display:flex;gap:2px;margin:12px 0 0;background:#efe9dd;border-radius:9px;padding:3px}
+    .moseg button{flex:1;border:none;background:none;border-radius:7px;padding:7px 0;
+      font:600 13px/1 "Segoe UI",sans-serif;color:var(--muted)}
+    .moseg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.10)}
+    #mohead .moseg{margin-bottom:10px}
+
+    /* --- chart / roster panes --- */
+    #planwrap{padding:14px 12px 0}
+    #main.showroster #planwrap,#main.showroster #zoombar{display:none}
+    #main:not(.showroster) #roster{display:none !important}
+    #roster{padding:14px 12px 0}
+    .rcols{grid-template-columns:1fr;gap:10px}
+    .rtable{border-radius:12px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+    .rtable h4{font:600 10px/1 "Segoe UI",sans-serif;letter-spacing:.14em;color:var(--gold)}
+    .rtable ol{padding-left:18px;font-size:14px;line-height:1.75}
+
+    /* --- floating zoom pill --- */
+    #zoombar{position:fixed;right:12px;bottom:80px;z-index:22;margin:0;gap:0;
+      background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:22px;
+      box-shadow:0 3px 14px rgba(0,0,0,.13);padding:3px;
+      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    #zoombar button{border:none;background:none;width:38px;height:38px;padding:0;border-radius:50%;
+      font:600 16px/1 sans-serif;color:var(--ink)}
+    #zoombar #zoomfit{font-size:11px;letter-spacing:.04em}
+    #zoomlvl{display:none}
+
+    /* --- guest list sheet --- */
+    #side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;min-width:0;height:78vh;
+      border-right:none;border-top:none;border-radius:20px 20px 0 0;
+      box-shadow:0 -10px 40px rgba(0,0,0,.26);z-index:45;
+      transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
     #side.open{transform:translateY(0)}
-    #sheetbar{display:flex;align-items:center;gap:10px;padding:8px 14px 2px}
-    #sheetbar .grip{flex:1;height:4px;border-radius:2px;background:var(--line);max-width:70px;margin:0 auto}
-    #sheetbar button{padding:5px 12px}
-    #side h1{padding-top:6px;font-size:15px}
-    .guest{padding:9px 6px}                     /* bigger tap targets */
+    #sheetbar{display:flex;align-items:center;gap:10px;padding:9px 16px 0}
+    #sheetbar .grip{flex:1;height:4px;border-radius:2px;background:var(--line);max-width:44px;margin:0 auto}
+    #sheetbar button{padding:5px 13px;border-radius:16px;font-size:13px}
+    #side h1{padding:8px 16px 2px;font:400 20px/1.2 var(--display)}
+    #side .sub{padding:0 16px 10px}
+    .ctrls{padding:0 16px 10px}
+    .ctrls input,.ctrls select{padding:9px 11px;border-radius:9px}
+    #list{padding:0 10px 24px}
+    .guest{padding:10px 8px;border-radius:9px}
     .guest .tag:nth-child(n+3){display:none}     /* keep rows readable when narrow */
 
-    /* persistent bar: who you're placing */
-    #mobar{display:flex;align-items:center;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;
-      background:#fff;border-top:1px solid var(--line);padding:10px 12px;
-      box-shadow:0 -4px 16px rgba(0,0,0,.08)}
-    #mobar button{padding:9px 14px;font-weight:600}
-    #mosel{flex:1;min-width:0;font-size:12px;color:var(--muted);
+    /* --- generic bottom sheets (design picker, overflow menu) --- */
+    #moscrim{display:block;position:fixed;inset:0;background:rgba(28,26,23,.34);z-index:44;
+      opacity:0;pointer-events:none;transition:opacity .22s}
+    #moscrim.on{opacity:1;pointer-events:auto}
+    .sheet{display:block;position:fixed;left:0;right:0;bottom:0;z-index:46;background:#fff;
+      border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.26);padding:10px 0 max(14px,env(safe-area-inset-bottom));
+      transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);max-height:80vh;overflow:auto}
+    .sheet.open{transform:translateY(0)}
+    .sheet .grip{display:block;width:44px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 6px}
+    .sheet h3{margin:6px 18px 8px;font:400 17px/1.2 var(--display);color:var(--ink)}
+    .sheet .item{display:flex;align-items:center;gap:12px;width:100%;border:none;background:none;
+      padding:13px 18px;font:400 15px/1.2 "Segoe UI",sans-serif;color:var(--ink);text-align:left}
+    .sheet .item:active{background:#f4f1ea}
+    .sheet .item .meta{margin-left:auto;font-size:12px;color:var(--muted)}
+    .sheet .item.cur{color:var(--gold);font-weight:600}
+    .sheet .item.cur .meta{color:var(--gold)}
+    .sheet .item.danger{color:#a3342a}
+    .sheet .sep{height:1px;background:var(--line);margin:6px 18px}
+
+    /* --- bottom action bar --- */
+    #mobar{display:flex;align-items:center;gap:12px;position:fixed;left:0;right:0;bottom:0;z-index:30;
+      background:rgba(255,255,255,.94);border-top:1px solid var(--line);
+      padding:11px 14px max(11px,env(safe-area-inset-bottom));
+      box-shadow:0 -4px 20px rgba(0,0,0,.07);
+      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+    #mobar button{padding:11px 18px;font-weight:600;border-radius:22px;
+      background:var(--ink);color:#fff;border-color:var(--ink);font-size:14px}
+    #mobar button.armed{background:var(--gold);border-color:var(--gold);color:#241f10}
+    #mosel{flex:1;min-width:0;font-size:12.5px;color:var(--muted);
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #mosel b{color:var(--ink)}
-    #roster.on{padding-bottom:20px}
-    .rcols{grid-template-columns:1fr}
   }
 
   @media print{
@@ -181,6 +243,20 @@
   </aside>
 
   <main id="main">
+    <header id="mohead">
+      <div class="mohead-top">
+        <div>
+          <div class="monames">Mark &amp; Ann-Sophie</div>
+          <button class="modesign" id="modesign"><span id="modesignname">&nbsp;</span><span class="caret">&#9662;</span></button>
+        </div>
+        <button class="iconbtn" id="momenu" aria-label="More options">&#8943;</button>
+      </div>
+      <div class="moseg">
+        <button id="movchart" class="on">Chart</button>
+        <button id="movroster">Roster</button>
+      </div>
+    </header>
+
     <div class="topbar">
       <h2>Seating Chart</h2>
       <span class="dlab">Design</span>
@@ -232,6 +308,29 @@
 <div id="mobar">
   <button id="mobtnlist">Guest list</button>
   <span id="mosel"></span>
+</div>
+
+<div id="moscrim"></div>
+
+<div class="sheet" id="modesignsheet">
+  <span class="grip"></span>
+  <h3>Designs</h3>
+  <div id="modesignlist"></div>
+</div>
+
+<div class="sheet" id="momenusheet">
+  <span class="grip"></span>
+  <h3>Seating chart</h3>
+  <button class="item" data-act="saveas">Save as new design<span class="meta">copy</span></button>
+  <button class="item" data-act="new">Start an empty design</button>
+  <button class="item" data-act="rename">Rename this design</button>
+  <div class="sep"></div>
+  <button class="item" data-act="print">Print</button>
+  <button class="item" data-act="export">Export to file<span class="meta">.json</span></button>
+  <button class="item" data-act="import">Import from file</button>
+  <div class="sep"></div>
+  <button class="item danger" data-act="reset">Clear every seat</button>
+  <button class="item danger" data-act="delete">Delete this design</button>
 </div>
 
 <div id="pop"></div>
@@ -452,6 +551,8 @@ function renderDesigns(){
       sel.appendChild(o);
     });
   document.getElementById('printtitle').textContent=store.current;
+  document.getElementById('modesignname').textContent =
+    store.current+'  ·  '+Object.keys(state.assign).length+' seated';
   var u=state.updated?new Date(state.updated):null;
   document.getElementById('dstamp').textContent = u
     ? 'auto-saved '+u.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})
@@ -678,9 +779,15 @@ function renderList(){
   var seated=Object.keys(state.assign).length;
   document.getElementById('counts').textContent =
     guests.length+' guests · '+seated+' seated · '+(guests.length-seated)+' to place · 96 seats';
-  var mo=document.getElementById('mosel');
-  if(selected){ mo.innerHTML='Placing <b></b> — tap a seat'; mo.querySelector('b').textContent=byId[selected].name; }
-  else { mo.textContent=seated+' of '+guests.length+' seated'; }
+  var mo=document.getElementById('mosel'), mb=document.getElementById('mobtnlist');
+  if(selected){
+    mo.innerHTML='Placing <b></b> — tap a seat';
+    mo.querySelector('b').textContent=byId[selected].name;
+    mb.textContent='Cancel'; mb.classList.add('armed');
+  }else{
+    mo.textContent=seated+' of '+guests.length+' seated';
+    mb.textContent='Guest list'; mb.classList.remove('armed');
+  }
 }
 
 /* ============ roster ============ */
@@ -756,12 +863,66 @@ window.addEventListener('touchstart',function(){isTouch=true;hideTip();},{passiv
 function isNarrow(){return window.matchMedia('(max-width:860px)').matches;}
 
 var sideEl=document.getElementById('side');
-function openSheet(){sideEl.classList.add('open');}
-function closeSheet(){sideEl.classList.remove('open');}
+var scrim=document.getElementById('moscrim');
+var designSheet=document.getElementById('modesignsheet');
+var menuSheet=document.getElementById('momenusheet');
+
+function closeAllSheets(){
+  [sideEl,designSheet,menuSheet].forEach(function(el){el.classList.remove('open');});
+  scrim.classList.remove('on');
+}
+function showSheet(el){ closeAllSheets(); el.classList.add('open'); scrim.classList.add('on'); }
+function openSheet(){ showSheet(sideEl); }
+function closeSheet(){ closeAllSheets(); }
+scrim.onclick=closeAllSheets;
 document.getElementById('mobtnlist').onclick=function(){
-  sideEl.classList.contains('open')?closeSheet():openSheet();
+  if(selected){ selected=null; renderList(); return; }   /* button reads "Cancel" while placing */
+  sideEl.classList.contains('open')?closeAllSheets():openSheet();
 };
-document.getElementById('sheetclose').onclick=closeSheet;
+document.getElementById('sheetclose').onclick=closeAllSheets;
+
+/* design picker */
+document.getElementById('modesign').onclick=function(){ renderDesignSheet(); showSheet(designSheet); };
+function renderDesignSheet(){
+  var box=document.getElementById('modesignlist');
+  box.innerHTML='';
+  Object.keys(store.designs).sort(function(a,b){return a.localeCompare(b,undefined,{numeric:true});})
+    .forEach(function(n){
+      var b=document.createElement('button');
+      b.className='item'+(n===store.current?' cur':'');
+      b.textContent=n;
+      var m=document.createElement('span');
+      m.className='meta';
+      m.textContent=Object.keys(store.designs[n].assign||{}).length+' seated';
+      b.appendChild(m);
+      b.onclick=function(){ closeAllSheets(); switchDesign(n); };
+      box.appendChild(b);
+    });
+}
+
+/* overflow menu -> reuse the existing desktop handlers so there is one code path */
+document.getElementById('momenu').onclick=function(){ showSheet(menuSheet); };
+var MENU={saveas:'btnsaveas','new':'btnnew',rename:'btnrename',print:'btnprint',
+          export:'btnexport',import:'btnimport',reset:'btnreset',delete:'btndelete'};
+menuSheet.addEventListener('click',function(e){
+  var b=e.target.closest('.item'); if(!b) return;
+  var id=MENU[b.dataset.act]; if(!id) return;
+  closeAllSheets();
+  setTimeout(function(){ document.getElementById(id).click(); },60);  /* let the sheet close first */
+});
+
+/* Chart | Roster segmented control */
+var mainEl=document.getElementById('main');
+function setView(v){
+  var roster=v==='roster';
+  mainEl.classList.toggle('showroster',roster);
+  document.getElementById('roster').classList.toggle('on',roster);
+  document.getElementById('movchart').classList.toggle('on',!roster);
+  document.getElementById('movroster').classList.toggle('on',roster);
+  if(!roster && isNarrow()) fitZoom();
+}
+document.getElementById('movchart').onclick=function(){setView('chart');};
+document.getElementById('movroster').onclick=function(){setView('roster');};
 
 var planEl=document.getElementById('plan'), wrapEl=document.getElementById('planwrap');
 var zoom=1, pendingFit=false;
