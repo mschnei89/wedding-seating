@@ -54733,23 +54733,23 @@ planks.wrapS=planks.wrapT=RepeatWrapping; planks.repeat.set(14,14);
 /* ===================== scene ===================== */
 const scene=new Scene();
 scene.background=new Color(0x1b1410);
-scene.fog=new Fog(0x1b1410,26,66);
+scene.fog=new Fog(0x1b1410,20,52);
 
 const camera=new PerspectiveCamera(52,innerWidth/innerHeight,0.1,200);
 const renderer=new WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.toneMapping=ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.18;
+renderer.toneMappingExposure=1.30;
 renderer.outputColorSpace=SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true; controls.dampingFactor=.08;
-controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=3; controls.maxDistance=42;
+controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=3; controls.maxDistance=30;
 
 /* --- light: warm dusk through the windows, lanterns overhead, candles below --- */
-scene.add(new HemisphereLight(0xffe4bd,0x2a1d13,0.62));
+scene.add(new HemisphereLight(0xffe0b5,0x33231a,0.78));
 const sun=new DirectionalLight(0xffd9a0,1.25); sun.position.set(-9,9,-14); scene.add(sun);
 const fill=new DirectionalLight(0xa8c4e0,0.30); fill.position.set(10,7,10); scene.add(fill);
 
@@ -54766,40 +54766,40 @@ const floor=new Mesh(new PlaneGeometry(46,46),
 floor.rotation.x=-Math.PI/2; room.add(floor);
 
 /* window wall behind the head table + glowing dusk beyond */
-const glow=new Mesh(new PlaneGeometry(44,10),
+const glow=new Mesh(new PlaneGeometry(30,9),
   new MeshBasicMaterial({color:0xffe6bb}));
-glow.position.set(0,5,-17.6); room.add(glow);
-for(let i=-4;i<=4;i++){                               /* mullions */
-  const m=new Mesh(new BoxGeometry(.22,10,.22),WOOD_DK);
-  m.position.set(i*4.6,5,-17.4); room.add(m);
+glow.position.set(0,4.5,-12.6); room.add(glow);
+for(let i=-3;i<=3;i++){                               /* mullions */
+  const m=new Mesh(new BoxGeometry(.2,9,.2),WOOD_DK);
+  m.position.set(i*4.3,4.5,-12.45); room.add(m);
 }
-const sill=new Mesh(new BoxGeometry(44,.3,.5),WOOD_DK); sill.position.set(0,.15,-17.4); room.add(sill);
+const sill=new Mesh(new BoxGeometry(30,.3,.5),WOOD_DK); sill.position.set(0,.15,-12.45); room.add(sill);
 
-/* side + front walls — kept well clear of where the camera flies */
-[[-24,0],[24,0]].forEach(([x])=>{
-  const w=new Mesh(new BoxGeometry(.5,11,46),WOOD_DK); w.position.set(x,5.5,2); room.add(w);
+/* side + front walls — kept clear of where the camera flies */
+[-15.5,15.5].forEach(x=>{
+  const w=new Mesh(new BoxGeometry(.5,10,32),WOOD_DK); w.position.set(x,5,1); room.add(w);
 });
-const front=new Mesh(new BoxGeometry(48,11,.5),WOOD_DK); front.position.set(0,5.5,25); room.add(front);
+const front=new Mesh(new BoxGeometry(31,10,.5),WOOD_DK); front.position.set(0,5,16.5); room.add(front);
 
-/* log posts and the truss overhead */
-const postGeo=new CylinderGeometry(.34,.40,8.4,10);
+/* log posts, standing in the aisles between the table columns */
+const postGeo=new CylinderGeometry(.30,.36,7.6,10);
 const POSTS=[];
-for(let gx=-3;gx<=3;gx+=2) for(let gz=-2;gz<=2;gz+=2) POSTS.push([gx*5.2,gz*6.2]);
+[-9.5,-3.6,3.6,9.5].forEach(x=>[-5.6,1.6,8.4].forEach(z=>POSTS.push([x,z])));
 POSTS.forEach(([x,z])=>{
-  const p=new Mesh(postGeo,WOOD); p.position.set(x,4.2,z); room.add(p);
+  const p=new Mesh(postGeo,WOOD); p.position.set(x,3.8,z); room.add(p);
   /* greenery wrapping the post */
-  for(let i=0;i<8;i++){
-    const b=new Mesh(new SphereGeometry(.30+Math.random()*.22,6,5),GREEN);
-    b.position.set(x+(Math.random()-.5)*1.0,2.6+Math.random()*5.4,z+(Math.random()-.5)*1.0);
+  for(let i=0;i<7;i++){
+    const b=new Mesh(new SphereGeometry(.26+Math.random()*.20,6,5),GREEN);
+    b.position.set(x+(Math.random()-.5)*0.9,2.4+Math.random()*4.8,z+(Math.random()-.5)*0.9);
     b.scale.y=.65; room.add(b);
   }
 });
-for(let gz=-2;gz<=2;gz+=2){                           /* beams across */
-  const b=new Mesh(new BoxGeometry(34,.5,.5),WOOD); b.position.set(0,8.3,gz*6.2); room.add(b);
-}
-for(let gx=-3;gx<=3;gx+=2){
-  const b=new Mesh(new BoxGeometry(.5,.5,26),WOOD); b.position.set(gx*5.2,8.7,0); room.add(b);
-}
+[-5.6,1.6,8.4].forEach(z=>{                           /* beams across */
+  const b=new Mesh(new BoxGeometry(24,.44,.44),WOOD); b.position.set(0,7.5,z); room.add(b);
+});
+[-9.5,-3.6,3.6,9.5].forEach(x=>{
+  const b=new Mesh(new BoxGeometry(.44,.44,20),WOOD); b.position.set(x,7.9,1.4); room.add(b);
+});
 
 /* hanging lanterns */
 const lanternMat=new MeshBasicMaterial({color:0xffcf8a});
@@ -54818,17 +54818,19 @@ POSTS.forEach(([x,z],i)=>{
    horizontal tables seat 1-3 along the back and 4-6 along the front; vertical
    tables seat 1-3 down the left and 4-6 down the right.                        */
 const TL=2.4, TW=0.95, TH=0.76;                       /* table length / width / height */
-const HEAD_Z=-11, COL_Z=1.6;
-const COL_X=[-8.1,-2.7,2.7,8.1];
+const HEAD_Z=-8, COL_Z=-1.0;                          /* head table close in front of the windows */
+const COL_X=[-5.4,-1.8,1.8,5.4];                      /* ~1m of aisle between columns */
 const tables={};                                      /* id -> {x,z,orient} */
 for(let i=0;i<4;i++) tables[i+1]={x:(i-1.5)*TL, z:HEAD_Z, orient:'h'};
 for(let c=0;c<4;c++) for(let r=0;r<3;r++)
   tables[5+c*3+r]={x:COL_X[c], z:COL_Z+(r-1)*TL, orient:'v'};
 
+/* `face` is the group's rotation.y, and a person's local +z is the way they look,
+   so everyone has to be turned toward the table they are sitting at. */
 function seatPos(t,s){                                /* -> {x,z,face} */
   const T=tables[t], off=[-0.8,0,0.8][(s-1)%3], side=s<=3?-1:1;
-  if(T.orient==='h') return {x:T.x+off, z:T.z+side*1.02, face:side<0?Math.PI:0};
-  return {x:T.x+side*1.02, z:T.z+off, face:side<0?Math.PI/2:-Math.PI/2};
+  if(T.orient==='h') return {x:T.x+off, z:T.z+side*0.95, face:side<0?0:Math.PI};
+  return {x:T.x+side*0.95, z:T.z+off, face:side<0?Math.PI/2:-Math.PI/2};
 }
 
 const candleMat=new MeshBasicMaterial({color:0xffd79a});
@@ -54880,6 +54882,26 @@ const GEO={
 };
 const skinMat={ pale:new MeshStandardMaterial({color:SKIN.pale,roughness:.72}),
                 asian:new MeshStandardMaterial({color:SKIN.asian,roughness:.72}) };
+
+/* A sphere's +z pole sits at u=0.25, and canvas top maps to the sphere's top,
+   so the face is painted a quarter of the way across and a little above centre.
+   Doing it in the texture keeps 94 guests at one draw call each. */
+function faceTex(hex){
+  return makeTex((x,w,h)=>{
+    x.fillStyle='#'+hex.toString(16).padStart(6,'0'); x.fillRect(0,0,w,h);
+    const cx=w*0.25, eye=h*0.42;
+    x.fillStyle='rgba(223,124,112,.34)';                        /* warm cheeks */
+    [-1,1].forEach(s=>{ x.beginPath(); x.ellipse(cx+s*17,eye+13,7,5.5,0,0,7); x.fill(); });
+    x.fillStyle='#33231a';                                      /* eyes */
+    [-1,1].forEach(s=>{ x.beginPath(); x.ellipse(cx+s*9.5,eye,3.6,5,0,0,7); x.fill(); });
+    x.fillStyle='rgba(255,255,255,.9)';                         /* catchlights */
+    [-1,1].forEach(s=>{ x.beginPath(); x.arc(cx+s*9.5-1.3,eye-1.8,1.4,0,7); x.fill(); });
+    x.strokeStyle='#4a2c1e'; x.lineWidth=2.4; x.lineCap='round';/* smile */
+    x.beginPath(); x.arc(cx,eye+7,8.5,0.2*Math.PI,0.8*Math.PI); x.stroke();
+  },256,128);
+}
+const faceMat={ pale:new MeshStandardMaterial({map:faceTex(SKIN.pale),roughness:.72}),
+                asian:new MeshStandardMaterial({map:faceTex(SKIN.asian),roughness:.72}) };
 const hairMats={};
 function hairMat(c){ return hairMats[c]||(hairMats[c]=new MeshStandardMaterial({color:c,roughness:.94})); }
 const shirtCache={};
@@ -54911,7 +54933,8 @@ function addPerson(g,seat){
   grp.add(torso);
 
   const neck=new Mesh(GEO.neck,skin); neck.position.y=1.37; grp.add(neck);
-  const head=new Mesh(GEO.head,skin); head.position.y=1.50; grp.add(head);
+  const head=new Mesh(GEO.head,isAsian?faceMat.asian:faceMat.pale);
+  head.position.y=1.50; grp.add(head);
 
   const hair=new Mesh(g.sex==='m'?GEO.hairM:GEO.hairF,hairMat(hc));
   hair.position.y=g.sex==='m'?1.515:1.505;
@@ -54964,10 +54987,10 @@ renderer.domElement.addEventListener('pointerup',e=>{
 
 /* ===================== camera presets ===================== */
 const VIEWS={
-  room:  {p:[0,6.4,15],  t:[0,1.2,-3]},
-  head:  {p:[0,2.8,-5.2],t:[0,1.3,-11]},
-  floor: {p:[-9.5,2.4,9],t:[0,1.1,1]},
-  top:   {p:[0,24,6],    t:[0,0,-4]}
+  room:  {p:[0,5.6,11.5], t:[0,1.2,-3]},
+  head:  {p:[0,2.4,-3.0], t:[0,1.35,-8]},
+  floor: {p:[-7.0,2.0,5.5],t:[-1,1.15,-1]},
+  top:   {p:[0,19,4],     t:[0,0,-3]}
 };
 let anim=null;
 function goto(v,instant){
