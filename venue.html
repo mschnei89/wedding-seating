@@ -55066,6 +55066,7 @@ const SPEECH=[
   "Sophie, I love you more than anything in the world. Mark — run. ... Too late.",
   "To the bride and groom!"
 ];
+const RATE=1.25;                          /* speaking speed; the caption timing follows it */
 const speaker=people.find(p=>p.userData.guest.name==='Pauline Potocnik');
 const capEl=document.getElementById('cap'), capText=document.getElementById('captext');
 const toastBtn=document.getElementById('toastbtn');
@@ -55087,15 +55088,17 @@ function sayLine(i){
   if(i>=SPEECH.length){ endToast(); return; }
   const line=SPEECH[i];
   capText.textContent=line;
-  /* onend is unreliable across browsers, so always arm a fallback timer */
+  /* onend is unreliable across browsers, so always arm a fallback timer. Its
+     estimate is derived from RATE: if the timer fires early the next line is
+     spoken over the top of this one and the captions drift out of sync. */
   const words=line.split(/\s+/).length;
-  const est=Math.max(1500, (words/3.4)*1000);
+  const est=Math.max(1600, (words/(RATE*2.3))*1000);
   let moved=false;
   const next=()=>{ if(moved) return; moved=true; clearTimeout(lineTimer); sayLine(i+1); };
   lineTimer=setTimeout(next, est+700);
   if(window.speechSynthesis){
     const u=new SpeechSynthesisUtterance(line);
-    u.pitch=2; u.rate=1.5;                 /* squeaky and fast */
+    u.pitch=2; u.rate=RATE;                /* squeaky, quick but followable */
     if(voice) u.voice=voice;
     u.onend=next; u.onerror=next;
     try{ speechSynthesis.speak(u); }catch(e){}
