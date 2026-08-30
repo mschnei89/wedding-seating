@@ -54746,7 +54746,7 @@ document.body.appendChild(renderer.domElement);
 
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true; controls.dampingFactor=.08;
-controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=3; controls.maxDistance=30;
+controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=0.8; controls.maxDistance=30;
 
 /* --- light: warm dusk through the windows, lanterns overhead, candles below --- */
 scene.add(new HemisphereLight(0xffe0b5,0x33231a,0.78));
@@ -54871,11 +54871,15 @@ Object.entries(tables).forEach(([id,T])=>{
 });
 
 /* ===================== people ===================== */
+/* Hair has to be a partial sphere. A full one is wider than the head and simply
+   swallows the face. The crown stops just above the eyes (which sit at theta
+   0.42pi); the long piece skips a wedge centred on the face at phi = pi/2. */
+const FACE_GAP=0.66;
 const GEO={
   torso: new CylinderGeometry(.19,.25,.62,10),
-  head:  new SphereGeometry(.125,14,12),
-  hairM: new SphereGeometry(.132,12,10),
-  hairF: new SphereGeometry(.145,12,10),
+  head:  new SphereGeometry(.125,16,14),
+  crown: new SphereGeometry(.133,14,8,0,Math.PI*2,0,Math.PI*0.38),
+  long:  new SphereGeometry(.150,14,12,Math.PI/2+FACE_GAP,Math.PI*2-FACE_GAP*2,0,Math.PI*0.92),
   bun:   new SphereGeometry(.085,8,7),
   arm:   new CylinderGeometry(.055,.055,.46,6),
   neck:  new CylinderGeometry(.055,.06,.09,6)
@@ -54936,14 +54940,15 @@ function addPerson(g,seat){
   const head=new Mesh(GEO.head,isAsian?faceMat.asian:faceMat.pale);
   head.position.y=1.50; grp.add(head);
 
-  const hair=new Mesh(g.sex==='m'?GEO.hairM:GEO.hairF,hairMat(hc));
-  hair.position.y=g.sex==='m'?1.515:1.505;
-  hair.scale.y=g.sex==='m'?.80:.95;
-  if(g.sex==='f'){ hair.scale.z=1.12; hair.position.z=-.012; }
-  grp.add(hair);
-  if(g.sex==='f'&&(g.name.length%3===0)){             /* a few wear it up */
-    const bun=new Mesh(GEO.bun,hairMat(hc)); bun.position.set(0,1.56,-.13); grp.add(bun);
+  const hm=hairMat(hc);
+  const crown=new Mesh(GEO.crown,hm);
+  crown.position.y=1.502; crown.scale.y=g.sex==='m'?1.0:1.06; grp.add(crown);
+  const up=g.sex==='f'&&(g.name.length%3===0);        /* a few wear it up */
+  if(g.sex==='f'&&!up){                               /* the rest wear it long */
+    const back=new Mesh(GEO.long,hm);
+    back.position.set(0,1.500,-.010); back.scale.set(1,1.04,1.06); grp.add(back);
   }
+  if(up){ const bun=new Mesh(GEO.bun,hm); bun.position.set(0,1.555,-.125); grp.add(bun); }
   [-1,1].forEach(s=>{                                  /* arms resting toward the table */
     const a=new Mesh(GEO.arm,shirtMat(tag,g.sex));
     a.position.set(s*.245,1.02,.10); a.rotation.x=-0.55; a.rotation.z=s*0.12; grp.add(a);
