@@ -282,6 +282,7 @@
       <button id="btndelete">Delete</button>
       <span id="dstamp" class="stamp"></span>
       <span class="spacer"></span>
+      <button id="btn3d" title="See the room in 3D">3D view</button>
       <button id="btnroster">Roster view</button>
       <button id="btnexport">Export JSON</button>
       <button id="btnimport">Import JSON</button>
@@ -345,6 +346,8 @@
 <div class="sheet" id="momenusheet">
   <span class="grip"></span>
   <h3>Seating chart</h3>
+  <button class="item" data-act="view3d">See the room in 3D<span class="meta">everyone seated</span></button>
+  <div class="sep"></div>
   <button class="item" data-act="saveas">Save as new design<span class="meta">copy</span></button>
   <button class="item" data-act="new">Start an empty design</button>
   <button class="item" data-act="rename">Rename this design</button>
@@ -834,6 +837,7 @@ function renderRoster(){
 document.getElementById('btnroster').onclick=function(){
   document.getElementById('roster').classList.toggle('on');
 };
+document.getElementById('btn3d').onclick=function(){location.href='venue.html';};
 document.getElementById('btnprint').onclick=function(){window.print();};
 document.getElementById('btnreset').onclick=function(){
   if(confirm('Clear every seat assignment and lock in "'+store.current+'"?')){
@@ -926,7 +930,7 @@ function renderDesignSheet(){
 
 /* overflow menu -> reuse the existing desktop handlers so there is one code path */
 document.getElementById('momenu').onclick=function(){ showSheet(menuSheet); };
-var MENU={saveas:'btnsaveas','new':'btnnew',rename:'btnrename',print:'btnprint',
+var MENU={view3d:'btn3d',saveas:'btnsaveas','new':'btnnew',rename:'btnrename',print:'btnprint',
           export:'btnexport',import:'btnimport',reset:'btnreset',delete:'btndelete'};
 menuSheet.addEventListener('click',function(e){
   var b=e.target.closest('.item'); if(!b) return;
