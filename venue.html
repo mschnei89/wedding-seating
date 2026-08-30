@@ -88,7 +88,7 @@
 
 <div id="bottom">
   <a class="back pill" href="./">&larr; Chart</a>
-  <button id="toastbtn" class="pill gold">&#127866; Pauline&rsquo;s toast</button>
+  <button id="toastbtn" class="pill gold">&#129346; Pauline&rsquo;s toast</button>
   <span class="hint">Drag to look around · pinch or scroll to zoom · tap a guest to see who they are</span>
 </div>
 
@@ -55119,7 +55119,7 @@ function endToast(){
   clearTimeout(lineTimer);
   if(window.speechSynthesis){ try{ speechSynthesis.cancel(); }catch(e){} }
   toastBtn.classList.remove('live');
-  toastBtn.innerHTML='&#127866; Pauline&rsquo;s toast';
+  toastBtn.innerHTML='&#129346; Pauline&rsquo;s toast';
   capEl.classList.remove('on');
 }
 toastBtn.onclick=()=>{ standing?endToast():startToast(); };
