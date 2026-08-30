@@ -54775,11 +54775,11 @@ for(let i=-4;i<=4;i++){                               /* mullions */
 }
 const sill=new Mesh(new BoxGeometry(44,.3,.5),WOOD_DK); sill.position.set(0,.15,-17.4); room.add(sill);
 
-/* side + front walls */
-[[-22.6,0],[22.6,0]].forEach(([x])=>{
-  const w=new Mesh(new BoxGeometry(.5,11,36),WOOD_DK); w.position.set(x,5.5,0); room.add(w);
+/* side + front walls — kept well clear of where the camera flies */
+[[-24,0],[24,0]].forEach(([x])=>{
+  const w=new Mesh(new BoxGeometry(.5,11,46),WOOD_DK); w.position.set(x,5.5,2); room.add(w);
 });
-const front=new Mesh(new BoxGeometry(46,11,.5),WOOD_DK); front.position.set(0,5.5,18); room.add(front);
+const front=new Mesh(new BoxGeometry(48,11,.5),WOOD_DK); front.position.set(0,5.5,25); room.add(front);
 
 /* log posts and the truss overhead */
 const postGeo=new CylinderGeometry(.34,.40,8.4,10);
@@ -54964,10 +54964,10 @@ renderer.domElement.addEventListener('pointerup',e=>{
 
 /* ===================== camera presets ===================== */
 const VIEWS={
-  room:  {p:[0,7.5,20],  t:[0,1.2,-1]},
-  head:  {p:[0,3.0,-4.6],t:[0,1.3,-11]},
-  floor: {p:[-11,2.6,11],t:[1,1.1,1]},
-  top:   {p:[0,26,7],    t:[0,0,-3]}
+  room:  {p:[0,6.4,15],  t:[0,1.2,-3]},
+  head:  {p:[0,2.8,-5.2],t:[0,1.3,-11]},
+  floor: {p:[-9.5,2.4,9],t:[0,1.1,1]},
+  top:   {p:[0,24,6],    t:[0,0,-4]}
 };
 let anim=null;
 function goto(v,instant){
@@ -55003,4 +55003,6 @@ function tick(){
 }
 tick();
 requestAnimationFrame(()=>document.getElementById('loading').classList.add('done'));
+
+window.VENUE={scene,camera,controls,people,room,tables,seatPos,goto};   /* handle for inspection */
 </script>
