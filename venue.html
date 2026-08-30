@@ -43,6 +43,21 @@
     background:linear-gradient(rgba(18,15,12,0),rgba(18,15,12,.8))}
   #bottom .hint{flex:1;font-size:11.5px;color:#e9e0d0;opacity:.75;text-align:center}
   a.back{text-decoration:none}
+  .pill.gold{background:var(--gold);border-color:var(--gold);color:#241f10;flex:none}
+  .pill.gold.live{background:#b8322c;border-color:#b8322c;color:#fff}
+
+  /* lower-third captions for the toast */
+  #cap{position:fixed;left:50%;transform:translateX(-50%);bottom:74px;z-index:13;
+    width:min(660px,92vw);text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
+  #cap.on{opacity:1}
+  #cap p{margin:0;display:inline-block;background:rgba(18,15,12,.82);color:#fdf6e8;
+    padding:9px 15px;border-radius:11px;font:400 16px/1.42 var(--display);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  @media (max-width:700px){
+    #bottom .hint{display:none}
+    #cap{bottom:70px}
+    #cap p{font-size:14px;padding:8px 12px}
+  }
 
   #loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#120f0c;color:#e9e0d0;
     font:400 17px/1.3 var(--display);transition:opacity .5s}
@@ -69,8 +84,11 @@
   <div class="tg" id="ctg"></div>
 </div>
 
+<div id="cap"><p id="captext"></p></div>
+
 <div id="bottom">
   <a class="back pill" href="./">&larr; Chart</a>
+  <button id="toastbtn" class="pill gold">&#127866; Pauline&rsquo;s toast</button>
   <span class="hint">Drag to look around · pinch or scroll to zoom · tap a guest to see who they are</span>
 </div>
 
@@ -54955,12 +54973,14 @@ function addPerson(g,seat){
     back.position.set(0,1.500,-.010); back.scale.set(1,1.04,1.06); grp.add(back);
   }
   if(up){ const bun=new Mesh(GEO.bun,hm); bun.position.set(0,1.555,-.125); grp.add(bun); }
-  [-1,1].forEach(s=>{                                  /* arms resting toward the table */
+  const arms=[-1,1].map(s=>{                           /* arms resting toward the table */
     const a=new Mesh(GEO.arm,shirtMat(tag,g.sex));
     a.position.set(s*.245,1.02,.10); a.rotation.x=-0.55; a.rotation.z=s*0.12; grp.add(a);
+    return a;
   });
 
-  grp.userData={guest:g,seat:seat};
+  grp.userData={guest:g,seat:seat,arms:arms,
+                base:{x:p.x,z:p.z,face:p.face}};        /* pose to return to after standing */
   room.add(grp); people.push(grp);
 }
 Object.entries(PLAN.assign).forEach(([seat,gid])=>{ if(byId[gid]) addPerson(byId[gid],seat); });
@@ -55028,8 +55048,102 @@ document.querySelectorAll('#views button').forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll('#views button').forEach(x=>x.classList.remove('on'));
     b.classList.add('on'); goto(b.dataset.view); picked=null; card.classList.remove('on');
+    if(standing) endToast();
   };
 });
+
+/* ===================== Pauline's toast ===================== */
+const SPEECH=[
+  "Hi everyone! I'm Pauline — Sophie's sister — and I have exactly one thing to say about my sister.",
+  "She farts. Constantly. Relentlessly. Like a small Belgian air horn.",
+  "Mark, sweetheart, congratulations. You have married a wind instrument.",
+  "One time when we were very young, we were driving through the mountains, and Sophie let one go in the back seat, and Dad pulled the car over because he genuinely thought the transmission had gone.",
+  "Now. A safety announcement. We are in bear country tonight.",
+  "Bears are attracted to strong smells. So when Sophie starts, do not run. Lie flat. Play dead.",
+  "The bears will assume something has already died in here, and they will be correct.",
+  "And if you are sleeping in the cabin with Sophie tonight, be warned. She farts in her sleep. Rhythmically.",
+  "I shared a room with her for eleven years and I still wake up convinced a duck has gotten in.",
+  "Sophie, I love you more than anything in the world. Mark — run. ... Too late.",
+  "To the bride and groom!"
+];
+const speaker=people.find(p=>p.userData.guest.name==='Pauline Potocnik');
+const capEl=document.getElementById('cap'), capText=document.getElementById('captext');
+const toastBtn=document.getElementById('toastbtn');
+const spotlight=new PointLight(0xffd9a0,0,7,2); scene.add(spotlight);
+let standing=false, standK=0, lineTimer=null;
+
+let voice=null;
+function pickVoice(){
+  if(!window.speechSynthesis) return;
+  const vs=speechSynthesis.getVoices()||[];
+  voice = vs.find(v=>/samantha|zira|karen|moira|tessa|fiona|female|woman/i.test(v.name))
+       || vs.find(v=>/^en/i.test(v.lang)) || vs[0] || null;
+}
+pickVoice();
+if(window.speechSynthesis) speechSynthesis.addEventListener('voiceschanged',pickVoice);
+
+function sayLine(i){
+  if(!standing) return;
+  if(i>=SPEECH.length){ endToast(); return; }
+  const line=SPEECH[i];
+  capText.textContent=line;
+  /* onend is unreliable across browsers, so always arm a fallback timer */
+  const words=line.split(/\s+/).length;
+  const est=Math.max(1500, (words/3.4)*1000);
+  let moved=false;
+  const next=()=>{ if(moved) return; moved=true; clearTimeout(lineTimer); sayLine(i+1); };
+  lineTimer=setTimeout(next, est+700);
+  if(window.speechSynthesis){
+    const u=new SpeechSynthesisUtterance(line);
+    u.pitch=2; u.rate=1.5;                 /* squeaky and fast */
+    if(voice) u.voice=voice;
+    u.onend=next; u.onerror=next;
+    try{ speechSynthesis.speak(u); }catch(e){}
+  }
+}
+function startToast(){
+  if(!speaker) return;
+  standing=true;
+  toastBtn.classList.add('live');
+  toastBtn.innerHTML='&#9632; Stop';
+  picked=null; card.classList.remove('on');
+  capEl.classList.add('on');
+  const b=speaker.userData.base, fw={x:Math.sin(b.face),z:Math.cos(b.face)};
+  anim={from:camera.position.clone(),
+        to:new Vector3(b.x+fw.x*2.9, 2.05, b.z+fw.z*2.9),
+        tf:controls.target.clone(), tt:new Vector3(b.x,1.55,b.z), k:0};
+  sayLine(0);
+}
+function endToast(){
+  standing=false;
+  clearTimeout(lineTimer);
+  if(window.speechSynthesis){ try{ speechSynthesis.cancel(); }catch(e){} }
+  toastBtn.classList.remove('live');
+  toastBtn.innerHTML='&#127866; Pauline&rsquo;s toast';
+  capEl.classList.remove('on');
+}
+toastBtn.onclick=()=>{ standing?endToast():startToast(); };
+
+function animateSpeaker(){
+  if(!speaker) return;
+  const b=speaker.userData.base;
+  standK += ((standing?1:0)-standK)*0.11;
+  if(standK<0.001&&!standing){                 /* fully seated: rest exactly on the mark */
+    speaker.position.set(b.x,0,b.z); speaker.rotation.y=b.face;
+    speaker.userData.arms.forEach(a=>{a.rotation.x=-0.55;});
+    spotlight.intensity=0; return;
+  }
+  const t=performance.now()/1000;
+  speaker.position.y=standK*0.42;                       /* rise out of the chair */
+  speaker.position.x=b.x-Math.sin(b.face)*0.16*standK;  /* and step back from the table */
+  speaker.position.z=b.z-Math.cos(b.face)*0.16*standK;
+  speaker.rotation.y=b.face+Math.sin(t*2.1)*0.07*standK;
+  speaker.userData.arms.forEach((a,i)=>{                 /* gesturing while she talks */
+    a.rotation.x=-0.55+standK*(-0.30+Math.sin(t*3.2+i*1.9)*0.34);
+  });
+  spotlight.position.set(speaker.position.x,2.7,speaker.position.z);
+  spotlight.intensity=standK*8;
+}
 
 /* ===================== loop ===================== */
 /* Measure the canvas rather than the window, and never divide by a zero
@@ -55057,6 +55171,7 @@ function tick(){
     if(anim.k>=1) anim=null;
   }
   controls.update();
+  animateSpeaker();
   placeCard();                       /* keep the nameplate over their head as the view moves */
   renderer.render(scene,camera);
 }
