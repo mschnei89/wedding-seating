@@ -96,9 +96,58 @@
   .rtable ol{margin:0;padding-left:20px;font-size:13px}
   .rcols{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
 
+  /* ---------- zoom ---------- */
+  #zoombar{display:flex;align-items:center;gap:6px;margin:0 0 14px}
+  #zoombar button{padding:4px 10px;font:600 13px/1 sans-serif;min-width:34px}
+  #planwrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  #plan{transform-origin:top left;width:max-content}
+
+  /* ---------- mobile sheet + bottom bar (hidden on desktop) ---------- */
+  #sheetbar{display:none}
+  #mobar{display:none}
+
+  @media (max-width:860px){
+    .app{display:block;height:auto;overflow:visible}
+    body{overflow-x:hidden}
+    #main{padding:14px 12px 86px;overflow:visible}
+    .topbar{gap:6px}
+    .topbar h2{font-size:16px;width:100%}
+    .topbar button{padding:5px 9px;font-size:13px}
+    #designsel{min-width:0;flex:1 1 150px;max-width:none}
+    .dlab,#dstamp{display:none}
+    .spacer{display:none}
+    .hint{font-size:11px;margin-bottom:12px}
+
+    /* guest list becomes a bottom sheet */
+    #side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;min-width:0;height:76vh;
+      border-right:none;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
+      box-shadow:0 -10px 34px rgba(0,0,0,.22);z-index:40;
+      transform:translateY(100%);transition:transform .22s ease}
+    #side.open{transform:translateY(0)}
+    #sheetbar{display:flex;align-items:center;gap:10px;padding:8px 14px 2px}
+    #sheetbar .grip{flex:1;height:4px;border-radius:2px;background:var(--line);max-width:70px;margin:0 auto}
+    #sheetbar button{padding:5px 12px}
+    #side h1{padding-top:6px;font-size:15px}
+    .guest{padding:9px 6px}                     /* bigger tap targets */
+    .guest .tag:nth-child(n+3){display:none}     /* keep rows readable when narrow */
+
+    /* persistent bar: who you're placing */
+    #mobar{display:flex;align-items:center;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:30;
+      background:#fff;border-top:1px solid var(--line);padding:10px 12px;
+      box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+    #mobar button{padding:9px 14px;font-weight:600}
+    #mosel{flex:1;min-width:0;font-size:12px;color:var(--muted);
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #mosel b{color:var(--ink)}
+    #roster.on{padding-bottom:20px}
+    .rcols{grid-template-columns:1fr}
+  }
+
   @media print{
-    #side,.topbar,.hint{display:none}
+    #side,.topbar,.hint,#zoombar,#mobar{display:none}
     #main{overflow:visible}
+    #plan{transform:none !important}
+    #planwrap{overflow:visible}
     #printtitle{display:block;font:600 15px/1 sans-serif;letter-spacing:.04em;margin:0 0 18px;color:var(--muted)}
   }
 </style>
@@ -107,6 +156,7 @@
 <div class="app">
 
   <aside id="side">
+    <div id="sheetbar"><span class="grip"></span><button id="sheetclose">Done</button></div>
     <h1>Guest List</h1>
     <div class="sub"><span id="counts"></span></div>
     <div class="ctrls">
@@ -148,18 +198,32 @@
       drag seat&rarr;seat to swap &nbsp;&middot;&nbsp; right-click a seat to lock/unlock.
       <b>White</b> = empty, <b>black</b> = filled, <b>gold</b> = locked.</p>
 
-    <div class="zone">
-      <div class="zonelab">Head Table &nbsp;&mdash; tables 1&ndash;4</div>
-      <div class="headrow" id="headrow"></div>
+    <div id="zoombar">
+      <button id="zoomout" title="Zoom out">&minus;</button>
+      <button id="zoomfit" title="Fit the whole room on screen">Fit</button>
+      <button id="zoomin" title="Zoom in">+</button>
+      <span id="zoomlvl" class="stamp"></span>
     </div>
 
-    <div class="zone">
-      <div class="zonelab">Floor &nbsp;&mdash; tables 5&ndash;16</div>
-      <div class="grid" id="floor"></div>
-    </div>
+    <div id="planwrap"><div id="plan">
+      <div class="zone">
+        <div class="zonelab">Head Table &nbsp;&mdash; tables 1&ndash;4</div>
+        <div class="headrow" id="headrow"></div>
+      </div>
+
+      <div class="zone">
+        <div class="zonelab">Floor &nbsp;&mdash; tables 5&ndash;16</div>
+        <div class="grid" id="floor"></div>
+      </div>
+    </div></div>
 
     <div id="roster"><div class="rcols" id="rostercols"></div></div>
   </main>
+</div>
+
+<div id="mobar">
+  <button id="mobtnlist">Guest list</button>
+  <span id="mosel"></span>
 </div>
 
 <div id="pop"></div>
@@ -502,6 +566,7 @@ document.addEventListener('click',function(e){
 /* ============ tooltip ============ */
 var tip=document.getElementById('tip');
 function showTip(e){
+  if(isTouch) return;                 /* on a phone, hover tooltips just get stuck */
   var sid=e.currentTarget.dataset.seat, gid=state.assign[sid];
   var t=sid.match(/t(\d+)/)[1], s=sid.match(/s(\d+)/)[1];
   tip.innerHTML='';
@@ -564,7 +629,12 @@ function guestRow(g){
   d.className='guest'+(selected===g.id?' sel':'')+(sid?' seated':'')+(sid&&state.locked[sid]?' locked':'');
   d.draggable=true;
   d.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/guest',g.id);});
-  d.onclick=function(){selected=(selected===g.id)?null:g.id; renderList();};
+  d.onclick=function(){
+    selected=(selected===g.id)?null:g.id;
+    renderList();
+    /* on a phone the sheet covers the chart, so get out of the way once a guest is picked */
+    if(selected && isNarrow()) closeSheet();
+  };
   var n=document.createElement('div'); n.className='nm'; n.textContent=g.name;
   var tg=document.createElement('div'); tg.className='tags';
   g.tags.forEach(function(t){tg.appendChild(tagEl(t));});
@@ -600,6 +670,9 @@ function renderList(){
   var seated=Object.keys(state.assign).length;
   document.getElementById('counts').textContent =
     guests.length+' guests · '+seated+' seated · '+(guests.length-seated)+' to place · 96 seats';
+  var mo=document.getElementById('mosel');
+  if(selected){ mo.innerHTML='Placing <b></b> — tap a seat'; mo.querySelector('b').textContent=byId[selected].name; }
+  else { mo.textContent=seated+' of '+guests.length+' seated'; }
 }
 
 /* ============ roster ============ */
@@ -669,7 +742,51 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){selected=null;closePop();renderList();}
 });
 
+/* ============ mobile: bottom sheet, zoom, touch ============ */
+var isTouch=false;
+window.addEventListener('touchstart',function(){isTouch=true;hideTip();},{passive:true});
+function isNarrow(){return window.matchMedia('(max-width:860px)').matches;}
+
+var sideEl=document.getElementById('side');
+function openSheet(){sideEl.classList.add('open');}
+function closeSheet(){sideEl.classList.remove('open');}
+document.getElementById('mobtnlist').onclick=function(){
+  sideEl.classList.contains('open')?closeSheet():openSheet();
+};
+document.getElementById('sheetclose').onclick=closeSheet;
+
+var planEl=document.getElementById('plan'), wrapEl=document.getElementById('planwrap');
+var zoom=1;
+function applyZoom(z){
+  zoom=Math.min(1.6,Math.max(0.3,z));
+  planEl.style.transform='scale('+zoom+')';
+  /* transform doesn't affect layout, so the wrapper has to be told the scaled height */
+  wrapEl.style.height=Math.ceil(planEl.offsetHeight*zoom)+'px';
+  document.getElementById('zoomlvl').textContent=Math.round(zoom*100)+'%';
+}
+function fitZoom(){
+  var avail=wrapEl.clientWidth, natural=planEl.offsetWidth;
+  applyZoom(natural ? Math.min(1, avail/natural) : 1);
+}
+document.getElementById('zoomin').onclick=function(){applyZoom(zoom+0.1);};
+document.getElementById('zoomout').onclick=function(){applyZoom(zoom-0.1);};
+document.getElementById('zoomfit').onclick=fitZoom;
+
+/* start fitted on small screens; keep it fitted through rotation */
+var wasNarrow=isNarrow();
+if(wasNarrow) fitZoom(); else applyZoom(1);
+var rt;
+window.addEventListener('resize',function(){
+  clearTimeout(rt);
+  rt=setTimeout(function(){
+    var now=isNarrow();
+    if(now) fitZoom(); else if(wasNarrow) applyZoom(1); else applyZoom(zoom);
+    wasNarrow=now;
+  },150);
+});
+
 render();
+if(isNarrow()) fitZoom(); else applyZoom(zoom);
 </script>
 </body>
 </html>
