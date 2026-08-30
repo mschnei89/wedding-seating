@@ -108,6 +108,7 @@
   #mobar{display:none}
   #mohead{display:none}
   #moscrim{display:none}
+  #molegend{display:none}
   .sheet{display:none}
   .mobonly{display:none}
 
@@ -148,6 +149,20 @@
     .rtable{border-radius:12px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
     .rtable h4{font:600 10px/1 "Segoe UI",sans-serif;letter-spacing:.14em;color:var(--gold)}
     .rtable ol{padding-left:18px;font-size:14px;line-height:1.75}
+
+    /* --- legend card, which also gives the short page a proper footing --- */
+    #molegend{display:block;margin:18px 12px 0;padding:14px 16px;background:#fff;
+      border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    #molegend .keys{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;
+      font:500 12px/1 "Segoe UI",sans-serif;color:var(--muted)}
+    #molegend .dot{width:12px;height:12px;border-radius:50%;display:inline-block;
+      margin-right:7px;vertical-align:-1px;border:1.5px solid #b9ae9a;background:#fff}
+    #molegend .dot.full{background:var(--seatfull);border-color:var(--seatfull)}
+    #molegend .dot.lock{background:var(--gold);border-color:#a5831a}
+    #molegend p{margin:11px 0 0;padding-top:11px;border-top:1px solid var(--line);
+      font-size:12px;line-height:1.5;color:var(--muted);text-align:center}
+    #molegend p b{color:var(--ink)}
+    #main.showroster #molegend{display:none}
 
     /* --- floating zoom pill --- */
     #zoombar{position:fixed;right:12px;bottom:80px;z-index:22;margin:0;gap:0;
@@ -300,6 +315,15 @@
         <div class="grid" id="floor"></div>
       </div>
     </div></div>
+
+    <div id="molegend">
+      <div class="keys">
+        <span><i class="dot empty"></i>Empty</span>
+        <span><i class="dot full"></i>Seated</span>
+        <span><i class="dot lock"></i>Locked</span>
+      </div>
+      <p>Tap <b>Guest list</b> to pick someone, then tap their seat. Tap a filled seat to see who it is.</p>
+    </div>
 
     <div id="roster"><div class="rcols" id="rostercols"></div></div>
   </main>
