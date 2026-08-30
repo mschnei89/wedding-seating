@@ -105,6 +105,7 @@
   /* ---------- mobile sheet + bottom bar (hidden on desktop) ---------- */
   #sheetbar{display:none}
   #mobar{display:none}
+  .mobonly{display:none}
 
   @media (max-width:860px){
     .app{display:block;height:auto;overflow:visible}
@@ -117,6 +118,9 @@
     .dlab,#dstamp{display:none}
     .spacer{display:none}
     .hint{font-size:11px;margin-bottom:12px}
+    .deskonly{display:none}
+    .mobonly{display:inline}
+    .seat{width:38px;height:38px}     /* bigger targets to survive being scaled down */
 
     /* guest list becomes a bottom sheet */
     #side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;min-width:0;height:76vh;
@@ -194,8 +198,12 @@
       <button id="btnreset">Clear seats</button>
     </div>
     <div id="printtitle"></div>
-    <p class="hint">Click a guest, then click a seat &nbsp;&middot;&nbsp; or drag a name onto a seat &nbsp;&middot;&nbsp;
-      drag seat&rarr;seat to swap &nbsp;&middot;&nbsp; right-click a seat to lock/unlock.
+    <p class="hint">
+      <span class="deskonly">Click a guest, then click a seat &nbsp;&middot;&nbsp; or drag a name onto a seat &nbsp;&middot;&nbsp;
+        drag seat&rarr;seat to swap &nbsp;&middot;&nbsp; right-click a seat to lock/unlock. </span>
+      <span class="mobonly">Tap <b>Guest list</b>, pick a name, then tap a seat &nbsp;&middot;&nbsp;
+        tap a filled seat for their details, Lock or Remove &nbsp;&middot;&nbsp;
+        <b>+</b> to zoom in far enough to tap comfortably. </span>
       <b>White</b> = empty, <b>black</b> = filled, <b>gold</b> = locked.</p>
 
     <div id="zoombar">
