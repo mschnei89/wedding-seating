@@ -54741,10 +54741,10 @@ const scene=new Scene();
 scene.background=new Color(0x1b1410);
 scene.fog=new Fog(0x1b1410,20,52);
 
-const camera=new PerspectiveCamera(52,innerWidth/innerHeight,0.1,200);
+const camera=new PerspectiveCamera(52,(innerWidth||800)/(innerHeight||600),0.1,200);
 const renderer=new WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight);
+renderer.setSize(innerWidth||800,innerHeight||600);
 renderer.toneMapping=ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.30;
 renderer.outputColorSpace=SRGBColorSpace;
@@ -54976,14 +54976,17 @@ let picked=null;                                      /* nameplate follows this 
 const anchor=new Vector3();
 function placeCard(){
   if(!picked){ return; }
+  const v=viewport();
   anchor.set(picked.position.x,1.78,picked.position.z).project(camera);
-  if(anchor.z>1){ card.classList.remove('on'); return; }  /* behind the camera */
-  card.style.left=((anchor.x*0.5+0.5)*innerWidth)+'px';
-  card.style.top =((-anchor.y*0.5+0.5)*innerHeight)+'px';
+  if(anchor.z>1||!Number.isFinite(anchor.x)||!Number.isFinite(anchor.y)){
+    card.classList.remove('on'); return; }   /* behind the camera, or not measurable yet */
+  card.style.left=(v.left+(anchor.x*0.5+0.5)*v.w)+'px';
+  card.style.top =(v.top +(-anchor.y*0.5+0.5)*v.h)+'px';
   card.classList.add('on');
 }
 function pick(cx,cy){
-  ptr.x=(cx/innerWidth)*2-1; ptr.y=-(cy/innerHeight)*2+1;
+  const v=viewport();
+  ptr.x=((cx-v.left)/v.w)*2-1; ptr.y=-((cy-v.top)/v.h)*2+1;
   ray.setFromCamera(ptr,camera);
   const hit=ray.intersectObjects(people,true)[0];
   if(!hit){ picked=null; card.classList.remove('on'); return; }
@@ -55029,10 +55032,21 @@ document.querySelectorAll('#views button').forEach(b=>{
 });
 
 /* ===================== loop ===================== */
-addEventListener('resize',()=>{
-  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-});
+/* Measure the canvas rather than the window, and never divide by a zero
+   dimension: a 0 aspect makes the projection matrix NaN and the whole scene
+   vanishes with no way back. Browsers do report 0 mid-rotation. */
+function viewport(){
+  const r=renderer.domElement.getBoundingClientRect();
+  return { w:r.width||innerWidth||1, h:r.height||innerHeight||1, left:r.left, top:r.top };
+}
+function resize(){
+  const v=viewport();
+  if(v.w<2||v.h<2) return;
+  camera.aspect=v.w/v.h; camera.updateProjectionMatrix();
+  renderer.setSize(v.w,v.h,false);
+}
+addEventListener('resize',resize);
+addEventListener('orientationchange',()=>setTimeout(resize,120));
 function tick(){
   requestAnimationFrame(tick);
   if(anim){
