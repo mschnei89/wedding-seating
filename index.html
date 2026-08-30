@@ -764,17 +764,23 @@ document.getElementById('mobtnlist').onclick=function(){
 document.getElementById('sheetclose').onclick=closeSheet;
 
 var planEl=document.getElementById('plan'), wrapEl=document.getElementById('planwrap');
-var zoom=1;
+var zoom=1, pendingFit=false;
 function applyZoom(z){
   zoom=Math.min(1.6,Math.max(0.3,z));
   planEl.style.transform='scale('+zoom+')';
   /* transform doesn't affect layout, so the wrapper has to be told the scaled height */
-  wrapEl.style.height=Math.ceil(planEl.offsetHeight*zoom)+'px';
+  var h=planEl.offsetHeight;
+  if(h) wrapEl.style.height=Math.ceil(h*zoom)+'px';
   document.getElementById('zoomlvl').textContent=Math.round(zoom*100)+'%';
 }
 function fitZoom(){
   var avail=wrapEl.clientWidth, natural=planEl.offsetWidth;
-  applyZoom(natural ? Math.min(1, avail/natural) : 1);
+  /* A hidden tab or a not-yet-laid-out pane reports 0 here. Fitting to that
+     collapses the room to the minimum zoom and it stays that way, so wait
+     until there is something real to measure. */
+  if(!avail||!natural){ pendingFit=true; return; }
+  pendingFit=false;
+  applyZoom(Math.min(1, avail/natural));
 }
 document.getElementById('zoomin').onclick=function(){applyZoom(zoom+0.1);};
 document.getElementById('zoomout').onclick=function(){applyZoom(zoom-0.1);};
@@ -791,6 +797,12 @@ window.addEventListener('resize',function(){
     if(now) fitZoom(); else if(wasNarrow) applyZoom(1); else applyZoom(zoom);
     wasNarrow=now;
   },150);
+});
+
+/* a fit deferred for want of a measurable box gets retried once things are real */
+window.addEventListener('load',function(){ if(pendingFit||isNarrow()) fitZoom(); });
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden && (pendingFit||isNarrow())) fitZoom();
 });
 
 render();
