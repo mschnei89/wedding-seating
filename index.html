@@ -94,8 +94,16 @@
   #roster.on{display:block}
   .rtable{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;margin-bottom:8px}
   .rtable h4{margin:0 0 6px;font:600 12px/1 sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-  .rtable ol{margin:0;padding-left:20px;font-size:13px}
-  .rcols{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+  .rtable ul.seats{margin:0;padding:0;list-style:none;font-size:13px}
+  .rtable ul.seats li{display:flex;align-items:center;gap:8px;padding:3px 0}
+  .rtable .sn{flex:none;width:19px;height:19px;border-radius:50%;background:var(--surface);
+    color:#8a8172;font:600 10px/19px sans-serif;text-align:center}
+  .rtable .rn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rtable li.open .rn{color:#bdb4a4;font-style:italic}
+  .rtable li.open .sn{background:#f4f1ea;color:#c3baa9}
+  .veg{flex:none;font:600 9px/1 sans-serif;letter-spacing:.03em;padding:4px 6px;border-radius:3px;
+    background:#e3efdb;color:#3d6b2e;white-space:nowrap}
+  .rcols{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
 
   /* ---------- zoom ---------- */
   #zoombar{display:flex;align-items:center;gap:6px;margin:0 0 14px}
@@ -148,7 +156,9 @@
     .rcols{grid-template-columns:1fr;gap:10px}
     .rtable{border-radius:12px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
     .rtable h4{font:600 10px/1 "Segoe UI",sans-serif;letter-spacing:.14em;color:var(--gold)}
-    .rtable ol{padding-left:18px;font-size:14px;line-height:1.75}
+    .rtable ul.seats{font-size:14px}
+    .rtable ul.seats li{padding:5px 0}
+    .rtable .sn{width:21px;height:21px;line-height:21px}
 
     /* --- legend card, which also gives the short page a proper footing --- */
     #molegend{display:block;margin:18px 12px 0;padding:14px 16px;background:#fff;
@@ -189,7 +199,7 @@
     .ctrls input,.ctrls select{padding:9px 11px;border-radius:9px}
     #list{padding:0 10px 24px}
     .guest{padding:10px 8px;border-radius:9px}
-    .guest .tag:nth-child(n+3){display:none}     /* keep rows readable when narrow */
+    .guest .tag:nth-child(n+3):not(.keep){display:none}  /* keep rows readable when narrow */
 
     /* --- generic bottom sheets (design picker, overflow menu) --- */
     #moscrim{display:block;position:fixed;inset:0;background:rgba(28,26,23,.34);z-index:44;
@@ -380,7 +390,7 @@ Anne Brouwers,belgian,,
 Patricia (Tylleman),belgian,,
 Patrick Tylleman,belgian,,
 Andrew Gatewood,BU,,
-Amanda Gatewood,BU,,
+Amanda Gatewood,BU,vegetarian,
 Ian Kosmaczewski,BU,NYC,
 Kate Kosmaczewski,BU,NYC,
 Brandon Maxwell,camping,,
@@ -414,7 +424,7 @@ Anna Davids,doctor,,
 Eric Davids,doctor,,
 Sarah Hagerman,main,camping,finance bro
 Sean Hagerman,main,camping,finance bro
-Laura Moodley,main,camping,
+Laura Moodley,main,camping,vegetarian
 Nick Moodley,main,camping,
 Skyler Pinna,main,BU,finance bro
 Anna Scalamogna,main,BU,finance bro
@@ -475,12 +485,15 @@ const byId = Object.fromEntries(guests.map(function(g){return [g.id,g];}));
 /* deterministic color per tag */
 const allTags=[...new Set(guests.flatMap(function(g){return g.tags;}))].sort();
 function tagColor(t){
+  /* dietary flags get a fixed green everywhere rather than a hashed colour */
+  if(t==='vegetarian') return {bg:'#e3efdb', fg:'#3d6b2e'};
   var h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
   return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'};
 }
 function tagEl(t){
   var c=tagColor(t), s=document.createElement('span');
-  s.className='tag'; s.textContent=t; s.style.background=c.bg; s.style.color=c.fg; return s;
+  s.className='tag'+(t==='vegetarian'?' keep':'');   /* never trimmed on narrow screens */
+  s.textContent=t; s.style.background=c.bg; s.style.color=c.fg; return s;
 }
 
 /* ============ tables ============ */
@@ -823,13 +836,22 @@ function renderRoster(){
   tables.forEach(function(t){
     var d=document.createElement('div'); d.className='rtable';
     var h=document.createElement('h4'); h.textContent='Table '+t.id+(t.id<=4?' (head)':'');
-    var ol=document.createElement('ol');
+    var ul=document.createElement('ul'); ul.className='seats';
     [1,2,3,4,5,6].forEach(function(s){
       var g=state.assign[seatId(t.id,s)];
-      var li=document.createElement('li'); li.textContent=g?byId[g].name:'—';
-      ol.appendChild(li);
+      var li=document.createElement('li');
+      var sn=document.createElement('span'); sn.className='sn'; sn.textContent=s;
+      var nm=document.createElement('span'); nm.className='rn';
+      nm.textContent = g ? byId[g].name : 'open';
+      li.append(sn,nm);
+      if(!g) li.className='open';
+      else if(byId[g].tags.indexOf('vegetarian')>=0){
+        var v=document.createElement('span'); v.className='veg'; v.textContent='vegetarian';
+        li.appendChild(v);
+      }
+      ul.appendChild(li);
     });
-    d.append(h,ol); box.appendChild(d);
+    d.append(h,ul); box.appendChild(d);
   });
 }
 

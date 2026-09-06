@@ -54565,7 +54565,7 @@ Anne Brouwers,belgian,,
 Patricia (Tylleman),belgian,,
 Patrick Tylleman,belgian,,
 Andrew Gatewood,BU,,
-Amanda Gatewood,BU,,
+Amanda Gatewood,BU,vegetarian,
 Ian Kosmaczewski,BU,NYC,
 Kate Kosmaczewski,BU,NYC,
 Brandon Maxwell,camping,,
@@ -54599,7 +54599,7 @@ Anna Davids,doctor,,
 Eric Davids,doctor,,
 Sarah Hagerman,main,camping,finance bro
 Sean Hagerman,main,camping,finance bro
-Laura Moodley,main,camping,
+Laura Moodley,main,camping,vegetarian
 Nick Moodley,main,camping,
 Skyler Pinna,main,BU,finance bro
 Anna Scalamogna,main,BU,finance bro
@@ -54990,7 +54990,9 @@ document.getElementById('hudsub').textContent =
 /* ===================== picking ===================== */
 const ray=new Raycaster(), ptr=new Vector2();
 const card=document.getElementById('card');
-function tagColor(t){ let h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
+function tagColor(t){
+  if(t==='vegetarian') return {bg:'#e3efdb', fg:'#3d6b2e'};   /* matches the chart */
+  let h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
   return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'}; }
 let picked=null;                                      /* nameplate follows this guest */
 const anchor=new Vector3();
