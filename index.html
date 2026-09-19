@@ -60,6 +60,7 @@
   .surface{background:var(--surface);border:1px solid #cdc3b1;display:flex;align-items:center;justify-content:center;
     flex-direction:column;gap:2px;color:#8a8172;font:600 11px/1.1 sans-serif;text-align:center}
   .htable .surface{width:186px;height:62px}
+  .htable.h8 .surface{width:246px}
   .htable:not(:last-child) .surface{border-right:none}
   .vtable .surface{width:62px;height:186px}
   .vcol .vtable:not(:last-child) .surface{border-bottom:none}
@@ -318,7 +319,7 @@
 
     <div id="planwrap"><div id="plan">
       <div class="zone">
-        <div class="zonelab">Head Table &nbsp;&mdash; tables 1&ndash;4</div>
+        <div class="zonelab">Head Table &nbsp;&mdash; tables 1&ndash;4 &nbsp;&middot;&nbsp; eight seats each</div>
         <div class="headrow" id="headrow"></div>
       </div>
 
@@ -501,7 +502,7 @@ function tagEl(t){
 /* ============ tables ============ */
 /* DEV: nine floor tables, 5-13, seat eight (four a side) in three columns of three */
 const tables=[];
-for(let i=1;i<=4;i++)  tables.push({id:i,orient:'h',seats:6});
+for(let i=1;i<=4;i++)  tables.push({id:i,orient:'h',seats:8});
 for(let i=5;i<=13;i++) tables.push({id:i,orient:'v',seats:8});
 const TBY={}; tables.forEach(function(t){TBY[t.id]=t;});
 function seatList(id){ var a=[], n=TBY[id]?TBY[id].seats:6; for(var i=1;i<=n;i++) a.push(i); return a; }
@@ -509,11 +510,11 @@ const TOTAL_SEATS=tables.reduce(function(a,t){return a+t.seats;},0);
 function seatId(t,s){return 't'+t+'s'+s;}
 
 /* ============ designs + state ============ */
-const KEY='wedding-seating-v3';   /* v3: nine 8-seat floor tables; v2 plans used twelve 6-seat ones */
+const KEY='wedding-seating-v4';   /* v4: head tables seat eight; v3 plans numbered them for six */
 const OLDKEY='wedding-seating-v0';   /* nothing to migrate: older plans used a different floor */
 /* Starting designs baked into the page, so a first-time visitor sees the real
    plans instead of an empty room. Their own edits then live in their browser. */
-const SEED = /*SEED-START*/{"current":"Mark 1 (9 tables)","designs":{"Mark 1 (9 tables)":{"assign":{"t3s2":"g71","t3s6":"g40","t3s3":"g70","t2s3":"g0","t3s1":"g1","t3s5":"g72","t2s2":"g46","t2s1":"g48","t2s4":"g47","t2s5":"g45","t4s2":"g64","t4s5":"g65","t4s3":"g66","t4s6":"g67","t4s4":"g56","t4s1":"g55","t1s3":"g51","t1s2":"g53","t1s1":"g49","t1s4":"g50","t1s6":"g52","t1s5":"g54","t5s1":"g12","t5s2":"g14","t5s3":"g31","t5s4":"g33","t5s5":"g13","t5s6":"g15","t5s7":"g32","t5s8":"g34","t6s1":"g26","t6s2":"g27","t6s3":"g29","t6s5":"g25","t6s6":"g28","t6s7":"g30","t8s1":"g62","t8s2":"g57","t8s3":"g61","t8s4":"g59","t8s5":"g63","t8s6":"g58","t8s7":"g60","t8s8":"g35","t9s1":"g43","t9s2":"g41","t9s3":"g83","t9s4":"g79","t9s5":"g44","t9s6":"g42","t9s7":"g84","t9s8":"g80","t10s1":"g8","t10s2":"g5","t10s3":"g7","t10s5":"g9","t10s6":"g4","t10s7":"g6","t12s1":"g82","t12s2":"g86","t12s3":"g89","t12s4":"g16","t12s5":"g81","t12s6":"g87","t12s7":"g85","t12s8":"g88","t13s1":"g73","t13s5":"g74","t6s8":"g24","t6s4":"g23","t7s1":"g21","t7s5":"g22","t7s6":"g68","t7s2":"g69","t11s4":"g77","t11s6":"g2","t11s7":"g76","t11s1":"g11","t11s2":"g10","t11s5":"g3","t11s8":"g75","t11s3":"g78","t7s3":"g38","t7s7":"g39","t10s8":"g94","t7s8":"g37","t7s4":"g36","t13s4":"g92","t13s8":"g93","t13s7":"g91","t13s3":"g90","t13s2":"g17","t13s6":"g18"},"locked":{"t4s5":true,"t4s6":true,"t4s3":true,"t4s2":true,"t3s6":true,"t3s5":true,"t3s2":true,"t3s3":true,"t3s1":true,"t2s3":true,"t2s2":true,"t2s5":true,"t2s1":true,"t2s4":true,"t1s3":true,"t1s6":true,"t1s2":true,"t1s5":true,"t1s1":true,"t1s4":true,"t4s1":true,"t4s4":true},"updated":1789784780266},"Head table (locked)":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788112485083}}}/*SEED-END*/;
+const SEED = /*SEED-START*/{"current":"Mark 1 (9 tables)","designs":{"Mark 1 (9 tables)":{"assign":{"t3s2":"g71","t3s7":"g40","t3s3":"g70","t2s4":"g0","t3s1":"g1","t3s6":"g72","t2s3":"g46","t2s2":"g48","t2s6":"g47","t2s7":"g45","t4s2":"g64","t4s6":"g65","t4s3":"g66","t4s7":"g67","t4s5":"g56","t4s1":"g55","t1s4":"g51","t1s3":"g53","t1s2":"g49","t1s6":"g50","t1s8":"g52","t1s7":"g54","t5s1":"g12","t5s2":"g14","t5s3":"g31","t5s4":"g33","t5s5":"g13","t5s6":"g15","t5s7":"g32","t5s8":"g34","t6s1":"g26","t6s2":"g27","t6s3":"g29","t6s5":"g25","t6s6":"g28","t6s7":"g30","t8s1":"g62","t8s2":"g57","t8s3":"g61","t8s4":"g59","t8s5":"g63","t8s6":"g58","t8s7":"g60","t8s8":"g35","t9s1":"g43","t9s2":"g41","t9s3":"g83","t9s4":"g79","t9s5":"g44","t9s6":"g42","t9s7":"g84","t9s8":"g80","t10s1":"g8","t10s2":"g5","t10s3":"g7","t10s5":"g9","t10s6":"g4","t10s7":"g6","t12s1":"g82","t12s2":"g86","t12s3":"g89","t12s4":"g16","t12s5":"g81","t12s6":"g87","t12s7":"g85","t12s8":"g88","t13s1":"g73","t13s5":"g74","t6s8":"g24","t6s4":"g23","t7s1":"g21","t7s5":"g22","t7s6":"g68","t7s2":"g69","t11s4":"g77","t11s6":"g2","t11s7":"g76","t11s1":"g11","t11s2":"g10","t11s5":"g3","t11s8":"g75","t11s3":"g78","t7s3":"g38","t7s7":"g39","t10s8":"g94","t7s8":"g37","t7s4":"g36","t13s4":"g92","t13s8":"g93","t13s7":"g91","t13s3":"g90","t13s2":"g17","t13s6":"g18"},"locked":{"t4s6":true,"t4s7":true,"t4s3":true,"t4s2":true,"t3s7":true,"t3s6":true,"t3s2":true,"t3s3":true,"t3s1":true,"t2s4":true,"t2s3":true,"t2s7":true,"t2s2":true,"t2s6":true,"t1s4":true,"t1s8":true,"t1s3":true,"t1s7":true,"t1s2":true,"t1s6":true,"t4s1":true,"t4s5":true},"updated":1789784780266},"Head table (locked)":{"assign":{"t2s3":"g0","t2s4":"g1","t1s2":"g53","t1s6":"g54","t3s1":"g71","t3s2":"g70","t3s5":"g72","t1s7":"g52","t1s3":"g51","t3s6":"g58","t3s7":"g57","t3s3":"g55","t4s1":"g56","t1s4":"g48","t1s8":"g47","t2s6":"g45","t2s2":"g46"},"locked":{"t2s3":true,"t2s2":true,"t1s4":true,"t1s3":true,"t1s2":true,"t1s6":true,"t1s7":true,"t1s8":true,"t2s6":true,"t2s4":true,"t3s1":true,"t3s5":true,"t3s2":true,"t3s6":true,"t3s7":true,"t3s3":true,"t4s1":true},"updated":1788112485083}}}/*SEED-END*/;
 function blank(){return {assign:{},locked:{},updated:Date.now()};}
 function freshStore(){
   if(SEED && SEED.designs) return JSON.parse(JSON.stringify(SEED));
@@ -635,11 +636,12 @@ function surface(t){
   return s;
 }
 function hTable(t){
-  var w=document.createElement('div'); w.className='htable';
+  var n=TBY[t].seats, half=n/2, i;
+  var w=document.createElement('div'); w.className='htable h'+n;
   var top=document.createElement('div'); top.className='seatrow';
-  [1,2,3].forEach(function(i){top.appendChild(makeSeat(t,i));});
+  for(i=1;i<=half;i++) top.appendChild(makeSeat(t,i));
   var bot=document.createElement('div'); bot.className='seatrow';
-  [4,5,6].forEach(function(i){bot.appendChild(makeSeat(t,i));});
+  for(i=half+1;i<=n;i++) bot.appendChild(makeSeat(t,i));
   w.append(top,surface(t),bot); return w;
 }
 function vTable(t){

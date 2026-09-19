@@ -11,9 +11,9 @@ Interactive seating planners for the wedding and the rehearsal dinner. Each page
 
 ## The wedding room
 
-- **Head table** — tables 1–4, connected horizontally, six seats each (three top, three bottom).
+- **Head table** — tables 1–4, connected horizontally, eight seats each (four top, four bottom).
 - **Floor** — tables 5–13, three columns of three connected vertically, eight seats each (four left, four right).
-- 96 seats, 95 guests.
+- 104 seats, 95 guests.
 
 Floor columns run `5/6/7`, `8/9/10`, `11/12/13`, with the first table in each column nearest the head table.
 
