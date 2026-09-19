@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wedding Seating Chart</title>
+<title>Rehearsal Dinner Seating</title>
 <style>
   :root{
     --paper:#faf7f2; --ink:#1c1a17; --muted:#7a7266; --line:#ddd5c8;
@@ -67,8 +67,7 @@
   .seatrow{display:flex;gap:22px;padding:5px 0}
   .seatcol{display:flex;flex-direction:column;gap:22px;padding:0 5px}
 
-  .grid{display:flex;gap:66px;flex-wrap:wrap;justify-content:center}
-  .vtable.v8 .surface{height:246px}
+  .grid{display:flex;gap:52px;flex-wrap:wrap}
   .vcol{display:flex;flex-direction:column}
 
   .seat{width:34px;height:34px;border-radius:50%;border:1.5px solid #b9ae9a;background:var(--seat);
@@ -235,6 +234,50 @@
     #mosel b{color:var(--ink)}
   }
 
+
+  /* ---------- rehearsal room (drawn from the venue plan) ---------- */
+  .room{position:relative;border:1px solid var(--line);border-radius:6px;background-color:#fcfbf8;
+    background-image:linear-gradient(#ecebe6 1px,transparent 1px),linear-gradient(90deg,#ecebe6 1px,transparent 1px);
+    background-size:15px 15px}
+  .grp{position:absolute;left:0;top:0}
+  .gsurf{position:absolute;background:#e4e1da;border:1.5px solid #a9a397;border-radius:3px}
+  .gsurf.round{border-radius:50%}
+  .spare .gsurf{background:#f1f0ec;border-style:dashed;border-color:#c4beb2}
+  .tile{position:absolute;width:26px;height:26px;transform:translate(-50%,-50%);border-radius:4px;
+    background:#bdbdbd;color:#fff;font:600 11px/26px sans-serif;text-align:center}
+  .tile.diamond{transform:translate(-50%,-50%) rotate(45deg)}
+  .tile span{display:block}
+  .tile.diamond span{transform:rotate(-45deg)}
+  .spare .tile{background:#d3d0c9}
+  .cap{position:absolute;transform:translate(-50%,-50%);background:#f6e84b;color:#3a3200;
+    font:700 11px/1 sans-serif;padding:4px 6px;border-radius:3px;white-space:nowrap}
+  .cap.fixed{background:#3fd0e2;color:#053a42}
+  .fixkey{background:#3fd0e2;color:#053a42;padding:0 4px;border-radius:3px}
+  .door{position:absolute;background:#e3261c;color:#fff;border:1px solid #9b1510;
+    font:700 10px/1.15 sans-serif;text-align:center;display:grid;place-items:center;letter-spacing:.04em}
+  .room .seat{position:absolute;width:30px;height:30px;transform:translate(-50%,-50%);font-size:9px}
+  .room .seat:hover{transform:translate(-50%,-50%) scale(1.12)}
+  .room .seat.flex{border-style:dashed}
+  .room .seat.warn{border-color:#c0392b;border-style:dashed}
+  .room .seat.bench{border-color:#2f7a55;border-width:2px}
+  .room .seat.bench:not(.full):not(.locked){background:#dcefe3}
+  #molegend .dot.benchk{border-color:#2f7a55;background:#dcefe3}
+  .room.moving .seat{pointer-events:none;opacity:.55}
+  .room.moving .grp.movable .gsurf{cursor:move;outline:2px dashed var(--gold);outline-offset:3px}
+  .room.moving .grp.fixed .gsurf{cursor:not-allowed}
+  .room.moving .gsurf,.room.moving .tile,.room.moving .cap{touch-action:none}
+  #movebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff8d6;border:1px solid #e8d98a;
+    border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:12.5px}
+  #movebar[hidden]{display:none}
+  #movemsg{flex:1;min-width:200px}
+  #btnmove.on{background:var(--gold);border-color:var(--gold);color:#241f10}
+  #molegend .dot.flexk{border-style:dashed}
+  .rtable .rempty{margin:0;font-size:12px;color:#b3aa99;font-style:italic}
+  @media (max-width:860px){
+    .room .seat{width:34px;height:34px}
+    #movebar{margin:12px 12px 0}
+  }
+
   @media print{
     #side,.topbar,.hint,#zoombar,#mobar{display:none}
     #main{overflow:visible}
@@ -272,7 +315,7 @@
     <header id="mohead">
       <div class="mohead-top">
         <div>
-          <div class="monames">Mark &amp; Ann-Sophie</div>
+          <div class="monames">Rehearsal Dinner</div>
           <button class="modesign" id="modesign"><span id="modesignname">&nbsp;</span><span class="caret">&#9662;</span></button>
         </div>
         <button class="iconbtn" id="momenu" aria-label="More options">&#8943;</button>
@@ -284,7 +327,7 @@
     </header>
 
     <div class="topbar">
-      <h2>Seating Chart</h2>
+      <h2>Rehearsal Dinner</h2>
       <span class="dlab">Design</span>
       <select id="designsel" title="Switch between saved designs"></select>
       <button id="btnnew" title="Start a new, empty design">New</button>
@@ -293,7 +336,8 @@
       <button id="btndelete">Delete</button>
       <span id="dstamp" class="stamp"></span>
       <span class="spacer"></span>
-      <button id="btn3d" title="See the room in 3D">3D view</button>
+      <button id="btn3d" title="See the saloon in 3D">3D view</button>
+      <button id="btnmove" title="Rearrange the tables the venue lets you move">Move tables</button>
       <button id="btnroster">Roster view</button>
       <button id="btnexport">Export JSON</button>
       <button id="btnimport">Import JSON</button>
@@ -307,7 +351,7 @@
       <span class="mobonly">Tap <b>Guest list</b>, pick a name, then tap a seat &nbsp;&middot;&nbsp;
         tap a filled seat for their details, Lock or Remove &nbsp;&middot;&nbsp;
         <b>+</b> to zoom in far enough to tap comfortably. </span>
-      <b>White</b> = empty, <b>black</b> = filled, <b>gold</b> = locked.</p>
+      <b>White</b> = empty, <b>black</b> = filled, <b>gold</b> = locked, <b>dashed</b> = flex seat for the top of a range. <b class="fixkey">Blue</b> labels are the built-in booths, which the venue won't move; <b style="color:#2f7a55">green</b>-rimmed seats are on the banquette or in a booth.</p>
 
     <div id="zoombar">
       <button id="zoomout" title="Zoom out">&minus;</button>
@@ -316,23 +360,17 @@
       <span id="zoomlvl" class="stamp"></span>
     </div>
 
-    <div id="planwrap"><div id="plan">
-      <div class="zone">
-        <div class="zonelab">Head Table &nbsp;&mdash; tables 1&ndash;4</div>
-        <div class="headrow" id="headrow"></div>
-      </div>
+    <div id="movebar" hidden><span id="movemsg">Drag a table to move it. Tables with a <b class="fixkey">blue</b> label are fixed by the venue.</span><button id="movereset">Reset tables</button><button id="movedone">Done</button></div>
 
-      <div class="zone">
-        <div class="zonelab">Floor &nbsp;&mdash; tables 5&ndash;13 &nbsp;&middot;&nbsp; three columns of three, eight seats each</div>
-        <div class="grid" id="floor"></div>
-      </div>
-    </div></div>
+    <div id="planwrap"><div id="plan"><div id="room" class="room"></div></div></div>
 
     <div id="molegend">
       <div class="keys">
         <span><i class="dot empty"></i>Empty</span>
         <span><i class="dot full"></i>Seated</span>
         <span><i class="dot lock"></i>Locked</span>
+        <span><i class="dot flexk"></i>Flex</span>
+        <span><i class="dot benchk"></i>Bench</span>
       </div>
       <p>Tap <b>Guest list</b> to pick someone, then tap their seat. Tap a filled seat to see who it is.</p>
     </div>
@@ -357,7 +395,8 @@
 <div class="sheet" id="momenusheet">
   <span class="grip"></span>
   <h3>Seating chart</h3>
-  <button class="item" data-act="view3d">See the room in 3D<span class="meta">everyone seated</span></button>
+  <button class="item" data-act="view3d">See the saloon in 3D<span class="meta">everyone seated</span></button>
+  <button class="item" data-act="move">Move tables<span class="meta">booths are fixed</span></button>
   <div class="sep"></div>
   <button class="item" data-act="saveas">Save as new design<span class="meta">copy</span></button>
   <button class="item" data-act="new">Start an empty design</button>
@@ -377,7 +416,7 @@
 
 <script>
 /* ============ guest data (from Guest_List_Tagged.csv) ============ */
-const CSV = `name,Tag 1,Tag 2,Tag 3
+const CSV = `name,Tag 1,Tag 2,Tag 3,Tag 4
 Mark Schneider,couple,groom,mark family
 Ann-Sophie Van Backlé,couple,bride,belgian
 Joost Van Backlé,belgian,,parents
@@ -394,42 +433,16 @@ Andrew Gatewood,BU,,
 Amanda Gatewood,BU,vegetarian,
 Ian Kosmaczewski,BU,NYC,
 Kate Kosmaczewski,BU,NYC,
-Brandon Maxwell,camping,,
-Andy Moriarty,camping,,
-Ali Wood,camping,,
-Pete Milne,church,,
-Bekah Milne,church,,
-Canyon Law,church,finance bro,
-Sarah Eby,church,finance bro,
-Josh Rigby,church,,
-Lilly Rigby,church,,
 Samuel Veltkamp,church,,
 Erin Veltkamp,church,,
-MC Wilson,church,finance bro,
-Levin Wilson,church,finance bro,
-Taylor Mcallum,church,,
-Mark Mcallum,church,,
-Michael Franklin,CU,,knows gatewood
-Taylor Hartley,CU,,knows gatewood
-Austin Masket,CU,,
-Lizz Masket,CU,,
-Ryan Saunders,danville,,
-Pete Rodrik,danville church,joost friend,
-Amy Rodrik,danville church,joost friend,
-Paul Knight,DC,NYC,finance bro
-Sammie Knight,DC,NYC,finance bro
 Karin Wollschlaeger,doctor,,
-Jen Huynh,doctor,,
-Eddie Zhou,doctor,,
-Anna Davids,doctor,,
-Eric Davids,doctor,,
 Sarah Hagerman,main,camping,finance bro
 Sean Hagerman,main,camping,finance bro
 Laura Moodley,main,camping,vegetarian
 Nick Moodley,main,camping,
-Skyler Pinna,main,BU,finance bro
+Skyler Pinna,main,BU,finance bro,no fish
 Anna Scalamogna,main,BU,finance bro
-Alex LePore,main,DC,finance bro
+Alex LePore,main,DC,finance bro,pescatarian
 Michela LePore,main,DC,finance bro
 Drew Van Der Werff,main,DC,finance bro
 Brittney Van Der Werff,main,DC,finance bro
@@ -451,28 +464,11 @@ Jeff Mason,main,church,
 Mary Van Backlé,main,danville,
 Pauline Potocnik,main,Danville,
 Michael Potocnik,main,Danville,
-David Ouzts,mark camping,,
-MK Ouzts,mark camping,,
 Mary Schneider,Mark family,parents,
 Helmut Schneider,mark family,parents,
 Caroline Schneider,mark family,parents,
 Jessie Cottage,mark family,parents,
-Cory Albrechtsen,med school,,
-Craig Hicks,med school,,
-Mackenzie Goodrich,med school,,
-Joshua von Allworden,med school,,
-Cory Payne,med school,,
-Selena Payne,med school,,
-Kimberly Lugo,resident doctor,,
-Liana Mathias,resident doctor,,
-Robin Holby,resident doctor,,
-Mandy Ortiz,resident doctor,,
-Andrew Tannous,resident doctor,,
-Zach Tompers,skeena,,
-Rachael Blondy,skeena,,
-Ryan Kropp,skeena,,
-Amy Potter,skeena,,
-Luka Van Eyken,belgian,,`;
+Luka Van Eyken,belgian,,,`;
 
 const guests = CSV.trim().split(/\r?\n/).slice(1).map(function(line,i){
   var c = line.split(',');
@@ -486,35 +482,89 @@ const byId = Object.fromEntries(guests.map(function(g){return [g.id,g];}));
 
 /* deterministic color per tag */
 const allTags=[...new Set(guests.flatMap(function(g){return g.tags;}))].sort();
+var DIET={'vegetarian':1,'pescatarian':1,'no fish':1};   /* dietary flags, from the RSVPs */
 function tagColor(t){
   /* dietary flags get a fixed green everywhere rather than a hashed colour */
-  if(t==='vegetarian') return {bg:'#e3efdb', fg:'#3d6b2e'};
+  if(DIET[t]) return {bg:'#e3efdb', fg:'#3d6b2e'};
   var h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
   return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'};
 }
 function tagEl(t){
   var c=tagColor(t), s=document.createElement('span');
-  s.className='tag'+(t==='vegetarian'?' keep':'');   /* never trimmed on narrow screens */
+  s.className='tag'+(DIET[t]?' keep':'');   /* never trimmed on narrow screens */
   s.textContent=t; s.style.background=c.bg; s.style.color=c.fg; return s;
 }
 
-/* ============ tables ============ */
-/* DEV: nine floor tables, 5-13, seat eight (four a side) in three columns of three */
-const tables=[];
-for(let i=1;i<=4;i++)  tables.push({id:i,orient:'h',seats:6});
-for(let i=5;i<=13;i++) tables.push({id:i,orient:'v',seats:8});
-const TBY={}; tables.forEach(function(t){TBY[t.id]=t;});
-function seatList(id){ var a=[], n=TBY[id]?TBY[id].seats:6; for(var i=1;i<=n;i++) a.push(i); return a; }
-const TOTAL_SEATS=tables.reduce(function(a,t){return a+t.seats;},0);
+/* ============ room layout (traced from the venue's plan) ============ */
+/* Coordinates are the plan's own pixels (~510 x 620) and are scaled at render.
+   Capacities come from the yellow/blue numbers on the plan. Every table seats
+   both sides. Tables along the back and left walls stand against the green
+   banquette, so the wall side sits on the bench and the room side on chairs.
+   Tables 10, 16 and 35 - the ones the venue won't move - are built-in booths.
+   In every "8-10" or "4-6" the top of the range is two end chairs (drawn
+   dashed, as flex seats).                                                     */
+const S=1.5, PAD=30, W=510, H=620;
+const GROUPS=[
+  {id:10, label:'Table 10',     short:'10',    shape:'round', cx:460, cy:30,  r:32, n:5, a0:Math.PI/2, fixed:true, booth:true, tiles:['10']},
+  {id:11, label:'Tables 11–15', short:'11–15', x:423, y:132, w:70, h:344, sides:{left:4,right:4}, caps:'v', tiles:['11','12','13','14','15']},
+  {id:16, label:'Table 16',     short:'16',    x:405, y:512, w:43, h:81,  sides:{left:3,right:3}, fixed:true, booth:true, tiles:['16']},
+  {id:20, label:'Tables 20–23', short:'20–23', x:113, y:8,   w:239, h:50, sides:{top:4,bottom:4}, caps:'h', bench:'top', tiles:['23','22','21','20']},
+  {id:30, label:'Tables 30–32', short:'30–32', x:12,  y:85,  w:56, h:175, sides:{left:3,right:3}, bench:'left', tiles:['30','31','32']},
+  {id:33, label:'Tables 33–34', short:'33–34', x:15,  y:332, w:57, h:156, sides:{left:2,right:2}, caps:'v', warnCap:'top', bench:'left', tiles:['33','34']},
+  {id:35, label:'Table 35',     short:'35',    shape:'round', cx:65, cy:560, r:33, n:6, a0:Math.PI/6, fixed:true, booth:true, tiles:['35']},
+  /* table 42 sits between the tops of the two centre tables, so their inner sides start lower */
+  {id:41, label:'Tables 40–41', short:'40–41', x:270, y:155, w:72, h:327, sides:{left:4,right:4}, caps:'v', clip:{left:[225,482]}, tiles:['41','40'], tileShape:'diamond'},
+  {id:43, label:'Tables 43–44', short:'43–44', x:137, y:155, w:71, h:327, sides:{left:4,right:4}, caps:'v', clip:{right:[225,482]}, tiles:['43','44'], tileShape:'diamond'}
+];
+/* on the plan with no number beside them: drawn, but seat no one */
+const SPARES=[
+  {id:24, label:'Table 24', shape:'round', cx:35, cy:30, r:20, tiles:['24'], spare:true},
+  {id:42, label:'Table 42', shape:'round', cx:243, cy:178, r:24, tiles:['42'], tileShape:'diamond', spare:true, diamond:true}
+];
+const DOOR={x:0, y:277, w:105, h:36};
+
+function genSeats(g){
+  var out=[], OFF=15;
+  /* bench: sitting on the banquette or in a booth rather than on a chair */
+  function line(n,x0,y0,x1,y1,side){ for(var i=0;i<n;i++){ var t=(i+0.5)/n;
+    out.push({x:x0+(x1-x0)*t, y:y0+(y1-y0)*t, bench:!!g.booth||side===g.bench}); } }
+  if(g.shape==='round'){
+    var R=g.r+OFF;
+    for(var i=0;i<g.n;i++){ var a=g.a0+i*2*Math.PI/g.n; out.push({x:g.cx+R*Math.cos(a), y:g.cy+R*Math.sin(a), bench:!!g.booth}); }
+    return out;
+  }
+  var x=g.x, y=g.y, w=g.w, h=g.h, sd=g.sides, cl=g.clip||{};
+  if(sd.left)  { var a=cl.left ||[y,y+h]; line(sd.left,  x-OFF,a[0],   x-OFF,a[1],   'left'); }
+  if(sd.right) { var b=cl.right||[y,y+h]; line(sd.right, x+w+OFF,b[0], x+w+OFF,b[1], 'right'); }
+  if(sd.top)    line(sd.top,    x,y-OFF,   x+w,y-OFF,   'top');
+  if(sd.bottom) line(sd.bottom, x,y+h+OFF, x+w,y+h+OFF, 'bottom');
+  if(g.caps==='v'){ out.push({x:x+w/2, y:y-OFF,   flex:true, warn:g.warnCap==='top'});
+                    out.push({x:x+w/2, y:y+h+OFF, flex:true}); }
+  if(g.caps==='h'){ out.push({x:x-OFF,   y:y+h/2, flex:true});
+                    out.push({x:x+w+OFF, y:y+h/2, flex:true}); }
+  return out;
+}
+GROUPS.forEach(function(g){
+  g.seats=genSeats(g);
+  g.min=g.seats.filter(function(s){return !s.flex;}).length;
+  g.max=g.seats.length;
+});
+const GBY={}; GROUPS.concat(SPARES).forEach(function(g){GBY[g.id]=g;});
+const MIN_SEATS=GROUPS.reduce(function(a,g){return a+g.min;},0);
+const MAX_SEATS=GROUPS.reduce(function(a,g){return a+g.max;},0);
+function capText(g){ return g.min===g.max ? String(g.max) : g.min+'–'+g.max; }
+function GL(t){ return GBY[t] ? GBY[t].label : 'Table '+t; }
+function labelOf(sid){ return GL(sid.match(/t(\d+)/)[1]); }
+function SHORT(sid){ var g=GBY[sid.match(/t(\d+)/)[1]]; return g ? g.short : sid.match(/t(\d+)/)[1]; }
 function seatId(t,s){return 't'+t+'s'+s;}
 
 /* ============ designs + state ============ */
-const KEY='wedding-seating-v3';   /* v3: nine 8-seat floor tables; v2 plans used twelve 6-seat ones */
-const OLDKEY='wedding-seating-v0';   /* nothing to migrate: older plans used a different floor */
+const KEY='rehearsal-seating-v3';   /* v3: seats on both sides, banquettes and booths */
+const OLDKEY='rehearsal-seating-v0';   /* nothing to migrate */
 /* Starting designs baked into the page, so a first-time visitor sees the real
    plans instead of an empty room. Their own edits then live in their browser. */
-const SEED = /*SEED-START*/{"current":"Mark 1 (9 tables)","designs":{"Mark 1 (9 tables)":{"assign":{"t3s2":"g71","t3s6":"g40","t3s3":"g70","t2s3":"g0","t3s1":"g1","t3s5":"g72","t2s2":"g46","t2s1":"g48","t2s4":"g47","t2s5":"g45","t4s2":"g64","t4s5":"g65","t4s3":"g66","t4s6":"g67","t4s4":"g56","t4s1":"g55","t1s3":"g51","t1s2":"g53","t1s1":"g49","t1s4":"g50","t1s6":"g52","t1s5":"g54","t5s1":"g12","t5s2":"g14","t5s3":"g31","t5s4":"g33","t5s5":"g13","t5s6":"g15","t5s7":"g32","t5s8":"g34","t6s1":"g26","t6s2":"g27","t6s3":"g29","t6s5":"g25","t6s6":"g28","t6s7":"g30","t8s1":"g62","t8s2":"g57","t8s3":"g61","t8s4":"g59","t8s5":"g63","t8s6":"g58","t8s7":"g60","t8s8":"g35","t9s1":"g43","t9s2":"g41","t9s3":"g83","t9s4":"g79","t9s5":"g44","t9s6":"g42","t9s7":"g84","t9s8":"g80","t10s1":"g8","t10s2":"g5","t10s3":"g7","t10s5":"g9","t10s6":"g4","t10s7":"g6","t12s1":"g82","t12s2":"g86","t12s3":"g89","t12s4":"g16","t12s5":"g81","t12s6":"g87","t12s7":"g85","t12s8":"g88","t13s1":"g73","t13s5":"g74","t6s8":"g24","t6s4":"g23","t7s1":"g21","t7s5":"g22","t7s6":"g68","t7s2":"g69","t11s4":"g77","t11s6":"g2","t11s7":"g76","t11s1":"g11","t11s2":"g10","t11s5":"g3","t11s8":"g75","t11s3":"g78","t7s3":"g38","t7s7":"g39","t10s8":"g94","t7s8":"g37","t7s4":"g36","t13s4":"g92","t13s8":"g93","t13s7":"g91","t13s3":"g90","t13s2":"g17","t13s6":"g18"},"locked":{"t4s5":true,"t4s6":true,"t4s3":true,"t4s2":true,"t3s6":true,"t3s5":true,"t3s2":true,"t3s3":true,"t3s1":true,"t2s3":true,"t2s2":true,"t2s5":true,"t2s1":true,"t2s4":true,"t1s3":true,"t1s6":true,"t1s2":true,"t1s5":true,"t1s1":true,"t1s4":true,"t4s1":true,"t4s4":true},"updated":1789784780266},"Head table (locked)":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788112485083}}}/*SEED-END*/;
-function blank(){return {assign:{},locked:{},updated:Date.now()};}
+const SEED = /*SEED-START*/{"current":"Rehearsal plan","designs":{"Rehearsal plan":{"assign":{"t20s1":"g21","t20s2":"g0","t20s3":"g1","t20s4":"g45","t20s5":"g22","t20s6":"g20","t20s7":"g19","t20s8":"g46","t20s9":"g18","t20s10":"g44","t41s1":"g2","t41s2":"g48","t41s3":"g49","t41s5":"g3","t41s6":"g47","t41s7":"g50","t10s1":"g4","t10s2":"g5","t10s3":"g6","t10s4":"g7","t10s5":"g51","t43s1":"g29","t43s2":"g38","t43s3":"g40","t43s4":"g33","t43s5":"g30","t43s6":"g39","t43s7":"g41","t11s1":"g12","t11s2":"g14","t11s3":"g43","t11s4":"g16","t11s5":"g13","t11s6":"g15","t11s7":"g42","t11s8":"g17","t30s1":"g23","t30s2":"g27","t30s3":"g25","t30s4":"g24","t30s5":"g28","t30s6":"g26","t16s1":"g8","t16s2":"g11","t16s4":"g9","t16s5":"g10","t35s1":"g36","t35s2":"g37","t35s3":"g31","t35s4":"g32","t35s5":"g34","t35s6":"g35"},"locked":{},"pos":{},"updated":0}}}/*SEED-END*/;
+function blank(){return {assign:{},locked:{},pos:{},updated:Date.now()};}
 function freshStore(){
   if(SEED && SEED.designs) return JSON.parse(JSON.stringify(SEED));
   return {current:'design1',designs:{design1:blank()}};
@@ -539,17 +589,19 @@ if(!store.designs[store.current]) store.current=Object.keys(store.designs)[0];
 let state=store.designs[store.current];
 if(!state.assign) state.assign={};
 if(!state.locked) state.locked={};
+  if(!state.pos) state.pos={};
 let selected=null;
 
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
 function save(){ state.updated=Date.now(); store.designs[store.current]=state; persist(); }
-function clone(d){return {assign:Object.assign({},d.assign),locked:Object.assign({},d.locked),updated:Date.now()};}
+function clone(d){return {assign:Object.assign({},d.assign),locked:Object.assign({},d.locked),pos:JSON.parse(JSON.stringify(d.pos||{})),updated:Date.now()};}
 
 function switchDesign(name){
   if(!store.designs[name]) return;
   store.current=name; state=store.designs[name];
   if(!state.assign) state.assign={};
   if(!state.locked) state.locked={};
+  if(!state.pos) state.pos={};
   selected=null; persist(); render();
 }
 function uniqueName(base){
@@ -629,36 +681,109 @@ function makeSeat(t,s){
   });
   return d;
 }
-function surface(t){
-  var s=document.createElement('div'); s.className='surface';
-  s.innerHTML='<div>Table '+t+'</div><div class="cnt" data-cnt="'+t+'">0 / '+TBY[t].seats+'</div>';
-  return s;
+var roomEl=document.getElementById('room');
+roomEl.style.width=((W+2*PAD)*S)+'px';
+roomEl.style.height=((H+2*PAD)*S)+'px';
+function P(u){ return (u+PAD)*S; }
+function putAt(el,x,y){ el.style.left=P(x)+'px'; el.style.top=P(y)+'px'; }
+function centreOf(g){ return g.shape==='round' ? {x:g.cx,y:g.cy} : {x:g.x+g.w/2, y:g.y+g.h/2}; }
+function along(g,f){                      /* a point a fraction f down the table's long axis */
+  return g.h>=g.w ? {x:g.x+g.w/2, y:g.y+g.h*f} : {x:g.x+g.w*f, y:g.y+g.h/2};
 }
-function hTable(t){
-  var w=document.createElement('div'); w.className='htable';
-  var top=document.createElement('div'); top.className='seatrow';
-  [1,2,3].forEach(function(i){top.appendChild(makeSeat(t,i));});
-  var bot=document.createElement('div'); bot.className='seatrow';
-  [4,5,6].forEach(function(i){bot.appendChild(makeSeat(t,i));});
-  w.append(top,surface(t),bot); return w;
+function tileEl(num,shape){
+  var t=document.createElement('div'); t.className='tile'+(shape==='diamond'?' diamond':'');
+  var s=document.createElement('span'); s.textContent=num; t.appendChild(s); return t;
 }
-function vTable(t){
-  var n=TBY[t].seats, half=n/2, i;
-  var w=document.createElement('div'); w.className='vtable v'+n;
-  var left=document.createElement('div'); left.className='seatcol';
-  for(i=1;i<=half;i++) left.appendChild(makeSeat(t,i));
-  var right=document.createElement('div'); right.className='seatcol';
-  for(i=half+1;i<=n;i++) right.appendChild(makeSeat(t,i));
-  w.append(left,surface(t),right); return w;
+var grpEls={};
+function buildGroup(g){
+  var el=document.createElement('div');
+  el.className='grp '+(g.fixed?'fixed':'movable')+(g.spare?' spare':'');
+  el.dataset.gid=g.id;
+  el.title=g.spare ? g.label+' — no seating marked on the venue plan'
+                   : g.label+(g.fixed?' — fixed by the venue':'')+' · seats '+capText(g);
+  var surf=document.createElement('div');
+  surf.className='gsurf'+(g.shape==='round'?' round':'');
+  if(g.shape==='round'){
+    surf.style.left=P(g.cx-g.r)+'px'; surf.style.top=P(g.cy-g.r)+'px';
+    surf.style.width=surf.style.height=(2*g.r*S)+'px';
+    if(g.diamond){ surf.style.borderRadius='4px'; surf.style.transform='rotate(45deg)'; }
+  }else{
+    surf.style.left=P(g.x)+'px'; surf.style.top=P(g.y)+'px';
+    surf.style.width=(g.w*S)+'px'; surf.style.height=(g.h*S)+'px';
+  }
+  el.appendChild(surf);
+  var n=g.tiles.length, c=centreOf(g);
+  if(g.spare){ var st=tileEl(g.tiles[0],g.tileShape); putAt(st,c.x,c.y); el.appendChild(st); }
+  else{
+    var cap=document.createElement('div'); cap.className='cap'+(g.fixed?' fixed':''); cap.dataset.cnt=g.id;
+    if(n===1){
+      var t1=tileEl(g.tiles[0],g.tileShape); putAt(t1,c.x,c.y-11); el.appendChild(t1);
+      putAt(cap,c.x,c.y+13);
+    }else{
+      for(var i=0;i<n;i++){ var p=along(g,(i+0.5)/n), t=tileEl(g.tiles[i],g.tileShape); putAt(t,p.x,p.y); el.appendChild(t); }
+      var k=Math.floor(n/2)-1, pp=along(g,(k+1)/n);   /* the gap between the middle tiles */
+      putAt(cap,pp.x,pp.y);
+    }
+    el.appendChild(cap);
+    g.seats.forEach(function(s,i){
+      var d=makeSeat(g.id,i+1);
+      if(s.flex) d.classList.add('flex');
+      if(s.bench) d.classList.add('bench');
+      if(s.warn) d.classList.add('warn');
+      putAt(d,s.x,s.y); el.appendChild(d);
+    });
+  }
+  roomEl.appendChild(el); grpEls[g.id]=el;
 }
-var headrow=document.getElementById('headrow');
-[1,2,3,4].forEach(function(t){headrow.appendChild(hTable(t));});
-var floor=document.getElementById('floor');
-for(let c=0;c<3;c++){                      /* numbered down each column: 5-7, 8-10, 11-13 */
-  var col=document.createElement('div'); col.className='vcol';
-  for(let r=0;r<3;r++) col.appendChild(vTable(5+c*3+r));
-  floor.appendChild(col);
+GROUPS.concat(SPARES).forEach(buildGroup);
+var doorEl=document.createElement('div'); doorEl.className='door'; doorEl.textContent='EMERGENCY EXIT';
+doorEl.title='Emergency exit — keep clear';
+doorEl.style.left=P(DOOR.x)+'px'; doorEl.style.top=P(DOOR.y)+'px';
+doorEl.style.width=(DOOR.w*S)+'px'; doorEl.style.height=(DOOR.h*S)+'px';
+roomEl.appendChild(doorEl);
+
+function applyPos(){
+  GROUPS.concat(SPARES).forEach(function(g){
+    var p=(state.pos||{})[g.id];
+    grpEls[g.id].style.transform = p ? 'translate('+(p.dx*S)+'px,'+(p.dy*S)+'px)' : '';
+  });
 }
+
+/* ---- moving tables: only the ones the venue hasn't fixed ---- */
+var moving=false, drag=null;
+function moveMsg(txt){
+  var m=document.getElementById('movemsg');
+  m.innerHTML=txt || 'Drag a table to move it. Tables with a <b class="fixkey">blue</b> label are fixed by the venue.';
+}
+function setMoving(on){
+  moving=on; roomEl.classList.toggle('moving',on);
+  document.getElementById('movebar').hidden=!on;
+  document.getElementById('btnmove').classList.toggle('on',on);
+  moveMsg(); closePop(); hideTip();
+}
+roomEl.addEventListener('pointerdown',function(e){
+  if(!moving) return;
+  var el=e.target.closest('.grp'); if(!el) return;
+  var g=GBY[el.dataset.gid];
+  if(g.fixed){ moveMsg('<b>'+g.label+'</b> is fixed by the venue and can\'t be moved.'); return; }
+  var p=(state.pos||{})[g.id]||{dx:0,dy:0};
+  drag={id:g.id, el:el, sx:e.clientX, sy:e.clientY, dx0:p.dx, dy0:p.dy, cur:null};
+  try{ el.setPointerCapture(e.pointerId); }catch(err){}
+  e.preventDefault();
+});
+roomEl.addEventListener('pointermove',function(e){
+  if(!drag) return;
+  var k=zoom*S;                                   /* screen px -> plan units */
+  drag.cur={dx:drag.dx0+(e.clientX-drag.sx)/k, dy:drag.dy0+(e.clientY-drag.sy)/k};
+  drag.el.style.transform='translate('+(drag.cur.dx*S)+'px,'+(drag.cur.dy*S)+'px)';
+});
+function endDrag(){
+  if(!drag) return;
+  if(drag.cur){ state.pos=state.pos||{}; state.pos[drag.id]={dx:Math.round(drag.cur.dx),dy:Math.round(drag.cur.dy)}; save(); }
+  drag=null;
+}
+roomEl.addEventListener('pointerup',endDrag);
+roomEl.addEventListener('pointercancel',endDrag);
 
 /* ============ actions ============ */
 function place(gid,sid){
@@ -688,6 +813,7 @@ function toggleLock(sid){
   save(); render();
 }
 function onSeatClick(e){
+  if(moving) return;
   var sid=e.currentTarget.dataset.seat;
   if(selected){ place(selected,sid); return; }
   if(state.assign[sid]) openPop(e.currentTarget,sid);
@@ -700,7 +826,7 @@ function openPop(el,sid){
   pop.innerHTML='';
   var n=document.createElement('div'); n.className='pname'; n.textContent=g.name;
   var w=document.createElement('div'); w.style.cssText='font-size:12px;color:#7a7266';
-  w.textContent='Table '+sid.match(/t(\d+)/)[1]+' · seat '+sid.match(/s(\d+)/)[1];
+  w.textContent=labelOf(sid)+' · seat '+sid.match(/s(\d+)/)[1];
   var tg=document.createElement('div'); tg.className='ptags';
   g.tags.forEach(function(t){tg.appendChild(tagEl(t));});
   var b=document.createElement('div'); b.className='pbtns';
@@ -728,11 +854,12 @@ function showTip(e){
   tip.innerHTML='';
   var h=document.createElement('div');
   if(gid){
-    h.innerHTML='<b></b><br><span style="opacity:.7">Table '+t+' · seat '+s+
+    h.innerHTML='<b></b><br><span style="opacity:.7">'+GL(t)+' · seat '+s+
                 (state.locked[sid]?' · locked':'')+'</span>';
     h.querySelector('b').textContent=byId[gid].name;
   }else{
-    h.innerHTML='<span style="opacity:.85">Table '+t+' · seat '+s+' — empty</span>';
+    var el=e.currentTarget;
+    h.innerHTML='<span style="opacity:.85">'+GL(t)+' · seat '+s+' — empty'+(el.classList.contains('warn')?' · in front of the emergency exit':(el.classList.contains('flex')?' · flex seat':''))+'</span>';
   }
   tip.appendChild(h);
   if(gid){
@@ -759,11 +886,12 @@ function render(){
     el.classList.toggle('locked',!!state.locked[sid]);
     el.textContent = gid ? initials(byId[gid].name) : '';
   });
-  tables.forEach(function(t){
-    var n=seatList(t.id).filter(function(s){return state.assign[seatId(t.id,s)];}).length;
-    var el=document.querySelector('[data-cnt="'+t.id+'"]');
-    if(el) el.textContent=n+' / '+t.seats;
+  GROUPS.forEach(function(g){
+    var n=g.seats.filter(function(_,i){return state.assign[seatId(g.id,i+1)];}).length;
+    var el=document.querySelector('[data-cnt="'+g.id+'"]');
+    if(el) el.textContent=n+' / '+capText(g);
   });
+  applyPos();
   renderList(); renderRoster(); renderDesigns();
 }
 
@@ -797,7 +925,7 @@ function guestRow(g){
   d.append(n,tg);
   if(sid){
     var b=document.createElement('span'); b.className='seatno';
-    b.textContent='T'+sid.match(/t(\d+)/)[1]+'·'+sid.match(/s(\d+)/)[1];
+    b.textContent=SHORT(sid)+'·'+sid.match(/s(\d+)/)[1];
     d.appendChild(b);
   }
   return d;
@@ -825,7 +953,7 @@ function renderList(){
   }
   var seated=Object.keys(state.assign).length;
   document.getElementById('counts').textContent =
-    guests.length+' guests · '+seated+' seated · '+(guests.length-seated)+' to place · '+TOTAL_SEATS+' seats';
+    guests.length+' guests · '+seated+' seated · '+(guests.length-seated)+' to place · '+MIN_SEATS+'–'+MAX_SEATS+' seats';
   var mo=document.getElementById('mosel'), mb=document.getElementById('mobtnlist');
   if(selected){
     mo.innerHTML='Placing <b></b> — tap a seat';
@@ -840,25 +968,33 @@ function renderList(){
 /* ============ roster ============ */
 function renderRoster(){
   var box=document.getElementById('rostercols'); box.innerHTML='';
-  tables.forEach(function(t){
+  GROUPS.slice().sort(function(a,b){return a.id-b.id;}).forEach(function(g){
     var d=document.createElement('div'); d.className='rtable';
-    var h=document.createElement('h4'); h.textContent='Table '+t.id+(t.id<=4?' (head)':'');
+    var h=document.createElement('h4'); h.textContent=g.label+(g.fixed?' (fixed)':''); d.appendChild(h);
+    var here=g.seats.filter(function(_,i){return state.assign[seatId(g.id,i+1)];}).length;
+    if(!here){
+      var e=document.createElement('p'); e.className='rempty'; e.textContent='No one seated · seats '+capText(g);
+      d.appendChild(e); box.appendChild(d); return;
+    }
     var ul=document.createElement('ul'); ul.className='seats';
-    seatList(t.id).forEach(function(s){
-      var g=state.assign[seatId(t.id,s)];
+    g.seats.forEach(function(st,i){
+      var s=i+1, gid=state.assign[seatId(g.id,s)];
+      if(!gid && st.flex) return;
       var li=document.createElement('li');
       var sn=document.createElement('span'); sn.className='sn'; sn.textContent=s;
       var nm=document.createElement('span'); nm.className='rn';
-      nm.textContent = g ? byId[g].name : 'open';
+      nm.textContent = gid ? byId[gid].name : 'open';
       li.append(sn,nm);
-      if(!g) li.className='open';
-      else if(byId[g].tags.indexOf('vegetarian')>=0){
-        var v=document.createElement('span'); v.className='veg'; v.textContent='vegetarian';
-        li.appendChild(v);
-      }
+      if(!gid) li.className='open';
+      else byId[gid].tags.forEach(function(t){
+        if(!DIET[t]) return;
+        var v=document.createElement('span'); v.className='veg'; v.textContent=t; li.appendChild(v);
+      });
+      if(gid && st.warn){ var w=document.createElement('span'); w.className='veg'; w.style.background='#fbe1de';
+        w.style.color='#a3342a'; w.textContent='at the exit'; li.appendChild(w); }
       ul.appendChild(li);
     });
-    d.append(h,ul); box.appendChild(d);
+    d.appendChild(ul); box.appendChild(d);
   });
 }
 
@@ -866,11 +1002,15 @@ function renderRoster(){
 document.getElementById('btnroster').onclick=function(){
   document.getElementById('roster').classList.toggle('on');
 };
-document.getElementById('btn3d').onclick=function(){location.href='venue.html';};
+document.getElementById('btn3d').onclick=function(){location.href='rehearsal_venue.html';};
+document.getElementById('btnmove').onclick=function(){ setMoving(!moving); };
+document.getElementById('movedone').onclick=function(){ setMoving(false); };
+document.getElementById('movereset').onclick=function(){ state.pos={}; save(); render(); moveMsg('Tables are back where the venue plan has them.'); };
 document.getElementById('btnprint').onclick=function(){window.print();};
 document.getElementById('btnreset').onclick=function(){
   if(confirm('Clear every seat assignment and lock in "'+store.current+'"?')){
-    state=blank(); store.designs[store.current]=state; persist(); render();
+    var keepPos=state.pos; state=blank(); state.pos=keepPos||{};
+    store.designs[store.current]=state; persist(); render();
   }
 };
 document.getElementById('designsel').onchange=function(e){switchDesign(e.target.value);};
@@ -880,10 +1020,10 @@ document.getElementById('btnrename').onclick=renameDesign;
 document.getElementById('btndelete').onclick=deleteDesign;
 
 document.getElementById('btnexport').onclick=function(){
-  var out={format:'wedding-seating',version:2,current:store.current,designs:store.designs};
+  var out={format:'rehearsal-seating',version:1,current:store.current,designs:store.designs};
   var blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='seating-designs.json'; a.click();
+  a.download='rehearsal-designs.json'; a.click();
 };
 var fi=document.getElementById('fileinput');
 document.getElementById('btnimport').onclick=function(){fi.click();};
@@ -959,7 +1099,7 @@ function renderDesignSheet(){
 
 /* overflow menu -> reuse the existing desktop handlers so there is one code path */
 document.getElementById('momenu').onclick=function(){ showSheet(menuSheet); };
-var MENU={view3d:'btn3d',saveas:'btnsaveas','new':'btnnew',rename:'btnrename',print:'btnprint',
+var MENU={view3d:'btn3d',move:'btnmove',saveas:'btnsaveas','new':'btnnew',rename:'btnrename',print:'btnprint',
           export:'btnexport',import:'btnimport',reset:'btnreset',delete:'btndelete'};
 menuSheet.addEventListener('click',function(e){
   var b=e.target.closest('.item'); if(!b) return;

@@ -1,25 +1,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>The Room — 3D View</title>
+<title>Minturn Saloon — Rehearsal Dinner 3D</title>
 <style>
   :root{
-    --paper:#faf7f2; --ink:#1c1a17; --muted:#7a7266; --line:#ddd5c8; --gold:#c9a227;
+    --ink:#1c1a17; --muted:#7a7266; --gold:#c9a227;
     --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;overflow:hidden;background:#120f0c;
+  html,body{margin:0;height:100%;overflow:hidden;background:#0d1512;
     font:14px/1.4 "Segoe UI",system-ui,sans-serif;color:var(--ink);
     -webkit-user-select:none;user-select:none}
   canvas{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 
   #hud{position:fixed;top:0;left:0;right:0;z-index:10;padding:12px 16px;
-    background:linear-gradient(rgba(18,15,12,.72),rgba(18,15,12,0));color:#f6efe2;pointer-events:none}
+    background:linear-gradient(rgba(10,18,15,.72),rgba(10,18,15,0));color:#f3efe4;pointer-events:none}
   #hud .names{font:400 19px/1.15 var(--display);letter-spacing:.01em}
   #hud .sub{font-size:12px;opacity:.72;margin-top:2px}
 
   #views{position:fixed;top:12px;right:12px;z-index:12;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
   #views button,.pill{font:600 12px/1 "Segoe UI",sans-serif;padding:9px 13px;border-radius:20px;
-    border:1px solid rgba(255,255,255,.22);background:rgba(28,24,20,.62);color:#f6efe2;
+    border:1px solid rgba(255,255,255,.22);background:rgba(16,26,22,.62);color:#f3efe4;
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
   #views button.on{background:var(--gold);border-color:var(--gold);color:#241f10}
 
@@ -31,8 +31,7 @@
   #card.on{opacity:1}
   #card::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-9px;width:0;height:0;
     border-left:9px solid transparent;border-right:9px solid transparent;
-    border-top:10px solid rgba(255,255,255,.97);
-    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18))}
+    border-top:10px solid rgba(255,255,255,.97);filter:drop-shadow(0 3px 2px rgba(0,0,0,.18))}
   #card .nm{font:400 16px/1.2 var(--display)}
   #card .wh{font-size:11.5px;color:var(--muted);margin-top:2px}
   #card .tg{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:7px}
@@ -40,41 +39,27 @@
 
   #bottom{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;gap:8px;align-items:center;
     padding:12px 14px max(12px,env(safe-area-inset-bottom));
-    background:linear-gradient(rgba(18,15,12,0),rgba(18,15,12,.8))}
-  #bottom .hint{flex:1;font-size:11.5px;color:#e9e0d0;opacity:.75;text-align:center}
+    background:linear-gradient(rgba(10,18,15,0),rgba(10,18,15,.8))}
+  #bottom .hint{flex:1;font-size:11.5px;color:#e6e2d6;opacity:.75;text-align:center}
   a.back{text-decoration:none}
-  .pill.gold{background:var(--gold);border-color:var(--gold);color:#241f10;flex:none}
-  .pill.gold.live{background:#b8322c;border-color:#b8322c;color:#fff}
+  @media (max-width:700px){ #bottom .hint{display:none} }
 
-  /* lower-third captions for the toast */
-  #cap{position:fixed;left:50%;transform:translateX(-50%);bottom:74px;z-index:13;
-    width:min(660px,92vw);text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
-  #cap.on{opacity:1}
-  #cap p{margin:0;display:inline-block;background:rgba(18,15,12,.82);color:#fdf6e8;
-    padding:9px 15px;border-radius:11px;font:400 16px/1.42 var(--display);
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-  @media (max-width:700px){
-    #bottom .hint{display:none}
-    #cap{bottom:70px}
-    #cap p{font-size:14px;padding:8px 12px}
-  }
-
-  #loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#120f0c;color:#e9e0d0;
+  #loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#0d1512;color:#e6e2d6;
     font:400 17px/1.3 var(--display);transition:opacity .5s}
   #loading.done{opacity:0;pointer-events:none}
 </style>
 
-<div id="loading">Setting the room…</div>
+<div id="loading">Setting the saloon…</div>
 
 <div id="hud">
-  <div class="names">Mark &amp; Ann-Sophie</div>
+  <div class="names">Rehearsal Dinner · Minturn Saloon</div>
   <div class="sub" id="hudsub">&nbsp;</div>
 </div>
 
 <div id="views">
   <button data-view="room" class="on">Room</button>
   <button data-view="head">Head table</button>
-  <button data-view="floor">Floor</button>
+  <button data-view="booth">Booths</button>
   <button data-view="top">Above</button>
 </div>
 
@@ -84,11 +69,8 @@
   <div class="tg" id="ctg"></div>
 </div>
 
-<div id="cap"><p id="captext"></p></div>
-
 <div id="bottom">
-  <a class="back pill" href="./">&larr; Chart</a>
-  <button id="toastbtn" class="pill gold">&#129346; Pauline&rsquo;s toast</button>
+  <a class="back pill" href="rehearsal_dinner.html">&larr; Chart</a>
   <span class="hint">Drag to look around · pinch or scroll to zoom · tap a guest to see who they are</span>
 </div>
 
@@ -54550,8 +54532,8 @@ return OrbitControls;
 
 
 
-/* ===================== guest data ===================== */
-const CSV = `name,Tag 1,Tag 2,Tag 3
+/* ===================== guests (filled in by tools/build_rehearsal.py) ===================== */
+const CSV = `name,Tag 1,Tag 2,Tag 3,Tag 4
 Mark Schneider,couple,groom,mark family
 Ann-Sophie Van Backlé,couple,bride,belgian
 Joost Van Backlé,belgian,,parents
@@ -54568,42 +54550,16 @@ Andrew Gatewood,BU,,
 Amanda Gatewood,BU,vegetarian,
 Ian Kosmaczewski,BU,NYC,
 Kate Kosmaczewski,BU,NYC,
-Brandon Maxwell,camping,,
-Andy Moriarty,camping,,
-Ali Wood,camping,,
-Pete Milne,church,,
-Bekah Milne,church,,
-Canyon Law,church,finance bro,
-Sarah Eby,church,finance bro,
-Josh Rigby,church,,
-Lilly Rigby,church,,
 Samuel Veltkamp,church,,
 Erin Veltkamp,church,,
-MC Wilson,church,finance bro,
-Levin Wilson,church,finance bro,
-Taylor Mcallum,church,,
-Mark Mcallum,church,,
-Michael Franklin,CU,,knows gatewood
-Taylor Hartley,CU,,knows gatewood
-Austin Masket,CU,,
-Lizz Masket,CU,,
-Ryan Saunders,danville,,
-Pete Rodrik,danville church,joost friend,
-Amy Rodrik,danville church,joost friend,
-Paul Knight,DC,NYC,finance bro
-Sammie Knight,DC,NYC,finance bro
 Karin Wollschlaeger,doctor,,
-Jen Huynh,doctor,,
-Eddie Zhou,doctor,,
-Anna Davids,doctor,,
-Eric Davids,doctor,,
 Sarah Hagerman,main,camping,finance bro
 Sean Hagerman,main,camping,finance bro
 Laura Moodley,main,camping,vegetarian
 Nick Moodley,main,camping,
-Skyler Pinna,main,BU,finance bro
+Skyler Pinna,main,BU,finance bro,no fish
 Anna Scalamogna,main,BU,finance bro
-Alex LePore,main,DC,finance bro
+Alex LePore,main,DC,finance bro,pescatarian
 Michela LePore,main,DC,finance bro
 Drew Van Der Werff,main,DC,finance bro
 Brittney Van Der Werff,main,DC,finance bro
@@ -54625,387 +54581,466 @@ Jeff Mason,main,church,
 Mary Van Backlé,main,danville,
 Pauline Potocnik,main,Danville,
 Michael Potocnik,main,Danville,
-David Ouzts,mark camping,,
-MK Ouzts,mark camping,,
 Mary Schneider,Mark family,parents,
 Helmut Schneider,mark family,parents,
 Caroline Schneider,mark family,parents,
 Jessie Cottage,mark family,parents,
-Cory Albrechtsen,med school,,
-Craig Hicks,med school,,
-Mackenzie Goodrich,med school,,
-Joshua von Allworden,med school,,
-Cory Payne,med school,,
-Selena Payne,med school,,
-Kimberly Lugo,resident doctor,,
-Liana Mathias,resident doctor,,
-Robin Holby,resident doctor,,
-Mandy Ortiz,resident doctor,,
-Andrew Tannous,resident doctor,,
-Zach Tompers,skeena,,
-Rachael Blondy,skeena,,
-Ryan Kropp,skeena,,
-Amy Potter,skeena,,
-Luka Van Eyken,belgian,,`;
-
-/* guessed from first names, in guest order — easy to correct, one letter each */
-const GENDER =
-  'mfmfmfmfmf'+'fmmfmfmmfm'+'fmfmfmffmf'+'mmfmfmmfmf'+'ffmfmfmfmm'+
-  'fmfmffmfmf'+'fmfmfmfmfm'+'ffmmffmffm'+'mfmmfffffm'+'mfmf'+
-  'm';                                  /* Luka Van Eyken, added last so no id shifts */
-
+Luka Van Eyken,belgian,,,`;
+const GENDER = 'mfmfmfmfmffmmfmfmfffmfmmfmfmffmfmffmfmfmfmfmffmfmffm';            /* per guest, in list order; from the wedding list */
 const ASIAN = new Set(['Canyon Law','Josh Rigby','Jen Huynh','Eddie Zhou']);
-
-const SEED = /*VENUE-SEED*/{"current":"Mark 1 (9 tables)","designs":{"Mark 1 (9 tables)":{"assign":{"t3s2":"g71","t3s6":"g40","t3s3":"g70","t2s3":"g0","t3s1":"g1","t3s5":"g72","t2s2":"g46","t2s1":"g48","t2s4":"g47","t2s5":"g45","t4s2":"g64","t4s5":"g65","t4s3":"g66","t4s6":"g67","t4s4":"g56","t4s1":"g55","t1s3":"g51","t1s2":"g53","t1s1":"g49","t1s4":"g50","t1s6":"g52","t1s5":"g54","t5s1":"g12","t5s2":"g14","t5s3":"g31","t5s4":"g33","t5s5":"g13","t5s6":"g15","t5s7":"g32","t5s8":"g34","t6s1":"g26","t6s2":"g27","t6s3":"g29","t6s5":"g25","t6s6":"g28","t6s7":"g30","t8s1":"g62","t8s2":"g57","t8s3":"g61","t8s4":"g59","t8s5":"g63","t8s6":"g58","t8s7":"g60","t8s8":"g35","t9s1":"g43","t9s2":"g41","t9s3":"g83","t9s4":"g79","t9s5":"g44","t9s6":"g42","t9s7":"g84","t9s8":"g80","t10s1":"g8","t10s2":"g5","t10s3":"g7","t10s5":"g9","t10s6":"g4","t10s7":"g6","t12s1":"g82","t12s2":"g86","t12s3":"g89","t12s4":"g16","t12s5":"g81","t12s6":"g87","t12s7":"g85","t12s8":"g88","t13s1":"g73","t13s5":"g74","t6s8":"g24","t6s4":"g23","t7s1":"g21","t7s5":"g22","t7s6":"g68","t7s2":"g69","t11s4":"g77","t11s6":"g2","t11s7":"g76","t11s1":"g11","t11s2":"g10","t11s5":"g3","t11s8":"g75","t11s3":"g78","t7s3":"g38","t7s7":"g39","t10s8":"g94","t7s8":"g37","t7s4":"g36","t13s4":"g92","t13s8":"g93","t13s7":"g91","t13s3":"g90","t13s2":"g17","t13s6":"g18"},"locked":{"t4s5":true,"t4s6":true,"t4s3":true,"t4s2":true,"t3s6":true,"t3s5":true,"t3s2":true,"t3s3":true,"t3s1":true,"t2s3":true,"t2s2":true,"t2s5":true,"t2s1":true,"t2s4":true,"t1s3":true,"t1s6":true,"t1s2":true,"t1s5":true,"t1s1":true,"t1s4":true,"t4s1":true,"t4s4":true},"updated":1789784780266},"Head table (locked)":{"assign":{"t2s2":"g0","t2s3":"g1","t1s1":"g53","t1s4":"g54","t3s1":"g71","t3s2":"g70","t3s4":"g72","t1s5":"g52","t1s2":"g51","t3s5":"g58","t3s6":"g57","t3s3":"g55","t4s1":"g56","t1s3":"g48","t1s6":"g47","t2s4":"g45","t2s1":"g46"},"locked":{"t2s2":true,"t2s1":true,"t1s3":true,"t1s2":true,"t1s1":true,"t1s4":true,"t1s5":true,"t1s6":true,"t2s4":true,"t2s3":true,"t3s1":true,"t3s4":true,"t3s2":true,"t3s5":true,"t3s6":true,"t3s3":true,"t4s1":true},"updated":1788112485083}}}/*VENUE-SEED-END*/;
+const SEED = /*VENUE-SEED*/{"current":"Rehearsal plan","designs":{"Rehearsal plan":{"assign":{"t20s1":"g21","t20s2":"g0","t20s3":"g1","t20s4":"g45","t20s5":"g22","t20s6":"g20","t20s7":"g19","t20s8":"g46","t20s9":"g18","t20s10":"g44","t41s1":"g2","t41s2":"g48","t41s3":"g49","t41s5":"g3","t41s6":"g47","t41s7":"g50","t10s1":"g4","t10s2":"g5","t10s3":"g6","t10s4":"g7","t10s5":"g51","t43s1":"g29","t43s2":"g38","t43s3":"g40","t43s4":"g33","t43s5":"g30","t43s6":"g39","t43s7":"g41","t11s1":"g12","t11s2":"g14","t11s3":"g43","t11s4":"g16","t11s5":"g13","t11s6":"g15","t11s7":"g42","t11s8":"g17","t30s1":"g23","t30s2":"g27","t30s3":"g25","t30s4":"g24","t30s5":"g28","t30s6":"g26","t16s1":"g8","t16s2":"g11","t16s4":"g9","t16s5":"g10","t35s1":"g36","t35s2":"g37","t35s3":"g31","t35s4":"g32","t35s5":"g34","t35s6":"g35"},"locked":{},"pos":{},"updated":0}}}/*VENUE-SEED-END*/;
 
 const guests = CSV.trim().split(/\r?\n/).slice(1).map((line,i)=>{
   const c=line.split(',');
   return { id:'g'+i, name:c[0].trim(),
-           tags:c.slice(1).map(t=>t.trim().toLowerCase()).filter(Boolean),
-           sex:GENDER[i]||'f' };
+           tags:c.slice(1).map(t=>t.trim().toLowerCase()).filter(Boolean), sex:GENDER[i]||'f' };
 });
 const byId=Object.fromEntries(guests.map(g=>[g.id,g]));
 
-/* seating: prefer whatever the chart has saved in this browser, else the baked-in plan */
+/* the chart's saved plan in this browser wins, else the baked-in one */
 function loadPlan(){
   try{
-    const raw=localStorage.getItem('wedding-seating-v3');
+    const raw=localStorage.getItem('rehearsal-seating-v3');
     if(raw){
-      const s=JSON.parse(raw);
-      const d=s.designs&&s.designs[s.current];
-      if(d&&d.assign&&Object.keys(d.assign).length) return {name:s.current,assign:d.assign};
+      const s=JSON.parse(raw), d=s.designs&&s.designs[s.current];
+      if(d&&d.assign&&Object.keys(d.assign).length) return {name:s.current,assign:d.assign,pos:d.pos||{}};
     }
   }catch(e){}
   if(SEED&&SEED.designs){
     const d=SEED.designs[SEED.current];
-    if(d) return {name:SEED.current,assign:d.assign};
+    if(d) return {name:SEED.current,assign:d.assign,pos:d.pos||{}};
   }
-  return {name:'',assign:{}};
+  return {name:'',assign:{},pos:{}};
 }
 const PLAN=loadPlan();
 
-/* ===================== palette ===================== */
-const SKIN   = { pale:0xf0d0b4, asian:0xe8c49a };
-const HAIRS  = [0x2b1d12,0x3c2a18,0x6b4a2a,0x8c6239,0xc9a05a,0x1a1310];
-const GREY   = 0xa9a29a;
-
-/* one outfit per primary tag. `tex` draws a pattern, otherwise flat colour. */
-const OUTFITS = {
-  'couple':          {m:0x1a1a1e, f:0xfdfbf6},                       /* tux / dress   */
-  'belgian':         {tex:'belgium'},
-  'bu':              {m:0xb8332c, f:0xcc4a40},                       /* BU scarlet    */
-  'cu':              {tex:'cu'},                                     /* black + gold  */
-  'church':          {tex:'cross'},
-  'danville church': {tex:'cross', tint:0x9aa88f},
-  'camping':         {tex:'plaid'},
-  'mark camping':    {tex:'plaid2'},
-  'skeena':          {m:0x3f6f8c, f:0x5b8aa6},
-  'doctor':          {m:0x2f7f7a, f:0x3d918b},                       /* scrubs        */
-  'resident doctor': {m:0x4a7fa8, f:0x5b93bd},
-  'med school':      {m:0x4d7f5a, f:0x5f9470},
-  'danville':        {m:0x8a9a7b, f:0x9fae90},
-  'dc':              {m:0x2a3550, f:0x3a4767},
-  'mark family':     {m:0x33333a, f:0x6b5b6e},
-  'main':            {m:0x4a4a52, f:0xc99aa0}                        /* wedding guest */
-};
-
-/* ===================== canvas textures ===================== */
+/* ===================== textures ===================== */
 function makeTex(draw,w=64,h=64){
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   draw(c.getContext('2d'),w,h);
   const t=new CanvasTexture(c); t.colorSpace=SRGBColorSpace; return t;
 }
-const TEX={};
-TEX.belgium=makeTex((x,w,h)=>{                      /* Belgian tricolour jersey */
-  x.fillStyle='#161616'; x.fillRect(0,0,w/3,h);
-  x.fillStyle='#f4cf28'; x.fillRect(w/3,0,w/3,h);
-  x.fillStyle='#c8102e'; x.fillRect(2*w/3,0,w/3,h);
-});
-TEX.cu=makeTex((x,w,h)=>{                            /* CU black and gold */
-  x.fillStyle='#111014'; x.fillRect(0,0,w,h);
-  x.fillStyle='#cfa626'; x.fillRect(0,h*0.44,w,h*0.16);
-});
-TEX.cross=makeTex((x,w,h)=>{                         /* church: cream with a cross */
-  x.fillStyle='#f2ece0'; x.fillRect(0,0,w,h);
-  x.fillStyle='#8d7f66';
-  x.fillRect(w*0.46,h*0.22,w*0.08,h*0.40);
-  x.fillRect(w*0.36,h*0.33,w*0.28,h*0.08);
-});
-function plaid(a,b,c){
-  return makeTex((x,w,h)=>{
-    x.fillStyle=a; x.fillRect(0,0,w,h);
-    x.fillStyle=b;
-    for(let i=0;i<w;i+=16){ x.fillRect(i,0,6,h); x.fillRect(0,i,w,6); }
-    x.fillStyle=c;
-    for(let i=8;i<w;i+=32){ x.fillRect(i,0,2,h); x.fillRect(0,i,w,2); }
-  });
+function tiled(tex,rx,ry){
+  const t=tex.clone(); t.needsUpdate=true; t.wrapS=t.wrapT=RepeatWrapping; t.repeat.set(rx,ry); return t;
 }
-TEX.plaid =plaid('#7a3b2e','#3f2a22','#d8b26a');
+const TEX={};
+TEX.belgium=makeTex((x,w,h)=>{ x.fillStyle='#161616'; x.fillRect(0,0,w/3,h);
+  x.fillStyle='#f4cf28'; x.fillRect(w/3,0,w/3,h); x.fillStyle='#c8102e'; x.fillRect(2*w/3,0,w/3,h); });
+TEX.cu=makeTex((x,w,h)=>{ x.fillStyle='#111014'; x.fillRect(0,0,w,h); x.fillStyle='#cfa626'; x.fillRect(0,h*0.44,w,h*0.16); });
+TEX.cross=makeTex((x,w,h)=>{ x.fillStyle='#f2ece0'; x.fillRect(0,0,w,h); x.fillStyle='#8d7f66';
+  x.fillRect(w*0.46,h*0.22,w*0.08,h*0.40); x.fillRect(w*0.36,h*0.33,w*0.28,h*0.08); });
+function plaid(a,b,c){ return makeTex((x,w,h)=>{ x.fillStyle=a; x.fillRect(0,0,w,h); x.fillStyle=b;
+  for(let i=0;i<w;i+=16){ x.fillRect(i,0,6,h); x.fillRect(0,i,w,6); }
+  x.fillStyle=c; for(let i=8;i<w;i+=32){ x.fillRect(i,0,2,h); x.fillRect(0,i,w,2); } }); }
+TEX.plaid=plaid('#7a3b2e','#3f2a22','#d8b26a');
 TEX.plaid2=plaid('#2f4a35','#1d2f22','#c2803f');
 
-const planks=makeTex((x,w,h)=>{                      /* floor boards */
-  x.fillStyle='#9a7047'; x.fillRect(0,0,w,h);
-  for(let i=0;i<h;i+=16){
-    x.fillStyle='rgba(0,0,0,.20)'; x.fillRect(0,i,w,1.5);
-    x.fillStyle='rgba(255,255,255,.05)'; x.fillRect(0,i+2,w,1);
+/* green tufted leather: diamond creases with a button at every crossing */
+TEX.tuft=makeTex((x,w,h)=>{
+  x.fillStyle='#1d5a3e'; x.fillRect(0,0,w,h);
+  x.strokeStyle='rgba(0,0,0,.34)'; x.lineWidth=2;
+  for(let i=-h;i<w+h;i+=32){
+    x.beginPath(); x.moveTo(i,0); x.lineTo(i+h,h); x.stroke();
+    x.beginPath(); x.moveTo(i+h,0); x.lineTo(i,h); x.stroke();
   }
-  for(let i=0;i<220;i++){                            /* grain */
-    x.fillStyle='rgba(60,35,18,'+(Math.random()*0.13)+')';
-    x.fillRect(Math.random()*w,Math.random()*h,Math.random()*22,1);
-  }
-},128,128);
-planks.wrapS=planks.wrapT=RepeatWrapping; planks.repeat.set(14,14);
+  x.fillStyle='rgba(0,0,0,.55)';
+  for(let yy=0;yy<=h;yy+=16) for(let xx=(yy/16%2)*16;xx<=w;xx+=32){ x.beginPath(); x.arc(xx,yy,2.3,0,7); x.fill(); }
+  const g=x.createLinearGradient(0,0,0,h); g.addColorStop(0,'rgba(255,255,255,.12)'); g.addColorStop(1,'rgba(0,0,0,.16)');
+  x.fillStyle=g; x.fillRect(0,0,w,h);
+},128,64);
+/* dark bead-board wainscot */
+TEX.panel=makeTex((x,w,h)=>{ x.fillStyle='#2a1c13'; x.fillRect(0,0,w,h);
+  for(let i=0;i<w;i+=8){ x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(i,0,1.5,h);
+    x.fillStyle='rgba(255,210,160,.07)'; x.fillRect(i+2,0,1,h); } },128,32);
+/* pressed-tin ceiling */
+TEX.tin=makeTex((x,w,h)=>{ x.fillStyle='#211d1a'; x.fillRect(0,0,w,h);
+  for(let i=0;i<2;i++) for(let j=0;j<2;j++){ const ox=i*32, oy=j*32;
+    x.strokeStyle='rgba(190,160,110,.30)'; x.lineWidth=2; x.strokeRect(ox+3,oy+3,26,26);
+    x.strokeStyle='rgba(0,0,0,.6)'; x.strokeRect(ox+8,oy+8,16,16);
+    x.fillStyle='rgba(200,170,120,.22)'; x.beginPath(); x.arc(ox+16,oy+16,3,0,7); x.fill(); } });
+/* light oak floor */
+TEX.floor=makeTex((x,w,h)=>{ x.fillStyle='#b8895a'; x.fillRect(0,0,w,h);
+  for(let i=0;i<h;i+=16){ x.fillStyle='rgba(60,35,15,.22)'; x.fillRect(0,i,w,1.2);
+    x.fillStyle='rgba(255,240,220,.06)'; x.fillRect(0,i+2,w,1); }
+  for(let i=0;i<260;i++){ x.fillStyle='rgba(90,55,25,'+(Math.random()*0.12)+')';
+    x.fillRect(Math.random()*w,Math.random()*h,Math.random()*26,1); } },128,128);
+TEX.exit=makeTex((x,w,h)=>{ x.fillStyle='#3a0b08'; x.fillRect(0,0,w,h);
+  x.fillStyle='#ff3b2e'; x.font='bold 30px sans-serif'; x.textAlign='center'; x.textBaseline='middle';
+  x.fillText('EXIT',w/2,h/2+1); },128,48);
+function picTex(i){                                     /* old western portraits, very roughly */
+  const sep=i%2===0;
+  return makeTex((x,w,h)=>{
+    x.fillStyle=sep?'#c9b48d':'#d8d5ce'; x.fillRect(0,0,w,h);
+    const g=x.createRadialGradient(w/2,h*.45,4,w/2,h*.5,w*.7);
+    g.addColorStop(0,sep?'#6b5537':'#4d4d4d'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,w,h);
+    x.fillStyle=sep?'#3b2e1f':'#262626';
+    x.beginPath(); x.ellipse(w/2,h*.46,w*.15,h*.17,0,0,7); x.fill();
+    x.fillRect(w*.27,h*.64,w*.46,h*.36);
+    if(i%3!==1){ x.fillRect(w*.20,h*.27,w*.60,h*.05); x.fillRect(w*.33,h*.16,w*.34,h*.12); }   /* hat */
+  },64,80);
+}
 
 /* ===================== scene ===================== */
 const scene=new Scene();
-scene.background=new Color(0x1b1410);
-scene.fog=new Fog(0x1b1410,20,52);
-
-const camera=new PerspectiveCamera(52,(innerWidth||800)/(innerHeight||600),0.1,200);
+scene.background=new Color(0x0d1512);
+const camera=new PerspectiveCamera(55,(innerWidth||800)/(innerHeight||600),0.05,100);
 const renderer=new WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth||800,innerHeight||600);
 renderer.toneMapping=ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.30;
+renderer.toneMappingExposure=1.25;
 renderer.outputColorSpace=SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true; controls.dampingFactor=.08;
-controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=0.8; controls.maxDistance=30;
+controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=0.6; controls.maxDistance=16;
 
-/* --- light: warm dusk through the windows, lanterns overhead, candles below --- */
-scene.add(new HemisphereLight(0xffe0b5,0x33231a,0.78));
-const sun=new DirectionalLight(0xffd9a0,1.25); sun.position.set(-9,9,-14); scene.add(sun);
-const fill=new DirectionalLight(0xa8c4e0,0.30); fill.position.set(10,7,10); scene.add(fill);
+scene.add(new HemisphereLight(0xffe8c8,0x2a2118,0.85));
+const win=new DirectionalLight(0xfff1dc,0.9); win.position.set(-9,5,-3); scene.add(win);
 
 /* ===================== room ===================== */
-const WOOD    = new MeshStandardMaterial({color:0xa9784b,roughness:.85});
-const WOOD_DK = new MeshStandardMaterial({color:0x6d4b2c,roughness:.9});
-const TABLETOP= new MeshStandardMaterial({color:0xb8894f,roughness:.6});
-const LINEN   = new MeshStandardMaterial({color:0xf3ece0,roughness:.95});
-const GREEN   = new MeshStandardMaterial({color:0x4a6b3a,roughness:.9});
+/* The venue plan is ~510 x 620 of its own units; K turns that into metres. Group
+   positions keep the plan's layout, sizes are real-world ones, and tables against
+   a wall are snugged up to the banquette. */
+const K=0.022, HX=255*K, HZ=310*K, WALL_H=4.2, WAIN=1.55;
+const M=(c,o={})=>new MeshStandardMaterial(Object.assign({color:c,roughness:.8},o));
+const MAT={
+  teal:M(0x0e5852,{roughness:.9}), cornice:M(0x1c1410), trim:M(0x3a2618,{roughness:.6}),
+  leather:M(0x1f5a3f,{roughness:.45}), plinth:M(0x1a120c),
+  top:M(0x3a2a1f,{roughness:.5}), iron:M(0x1b1917,{roughness:.6,metalness:.4}),
+  bent:M(0xc8a06c,{roughness:.55}), napkin:M(0xf3efe6,{roughness:.95}),
+  glass:new MeshStandardMaterial({color:0xdfe9e6,roughness:.1,transparent:true,opacity:.5}),
+  candle:new MeshBasicMaterial({color:0xffd99a}),
+  globe:new MeshStandardMaterial({color:0xfff4dc,emissive:0xffe2b0,emissiveIntensity:1.25,roughness:.4}),
+  brass:M(0xb08a3e,{roughness:.35,metalness:.7}), frame:M(0x2b1d12,{roughness:.5}),
+  daylight:new MeshBasicMaterial({color:0xd7e6d6}), door:M(0x24170f,{roughness:.6})
+};
 const room=new Group(); scene.add(room);
+function box(w,h,d,mat,x,y,z,ry){ const m=new Mesh(new BoxGeometry(w,h,d),mat); m.position.set(x,y,z); if(ry) m.rotation.y=ry; room.add(m); return m; }
 
-const floor=new Mesh(new PlaneGeometry(46,46),
-  new MeshStandardMaterial({map:planks,roughness:.78}));
+/* floor + tin ceiling */
+const floor=new Mesh(new PlaneGeometry(2*HX,2*HZ),new MeshStandardMaterial({map:tiled(TEX.floor,7,8),roughness:.7}));
 floor.rotation.x=-Math.PI/2; room.add(floor);
+const ceil=new Mesh(new PlaneGeometry(2*HX,2*HZ),new MeshStandardMaterial({map:tiled(TEX.tin,2*HX/.62,2*HZ/.62),roughness:.5,metalness:.3}));
+ceil.rotation.x=Math.PI/2; ceil.position.y=WALL_H; room.add(ceil);
 
-/* window wall behind the head table + glowing dusk beyond */
-const glow=new Mesh(new PlaneGeometry(30,9),
-  new MeshBasicMaterial({color:0xffe6bb}));
-glow.position.set(0,4.5,-12.6); room.add(glow);
-for(let i=-3;i<=3;i++){                               /* mullions */
-  const m=new Mesh(new BoxGeometry(.2,9,.2),WOOD_DK);
-  m.position.set(i*4.3,4.5,-12.45); room.add(m);
+/* four walls: wainscot below, teal above, a ledge on top of the panelling, cornice at the ceiling */
+function wall(len,cx,cz,ry){
+  const pan=new Mesh(new PlaneGeometry(len,WAIN),new MeshStandardMaterial({map:tiled(TEX.panel,len/1.1,1),roughness:.55}));
+  pan.position.set(cx,WAIN/2,cz); pan.rotation.y=ry; room.add(pan);
+  const up=new Mesh(new PlaneGeometry(len,WALL_H-WAIN),MAT.teal);
+  up.position.set(cx,WAIN+(WALL_H-WAIN)/2,cz); up.rotation.y=ry; room.add(up);
+  const nx=Math.sin(ry), nz=Math.cos(ry);
+  box(len,.06,.09,MAT.trim, cx+nx*.045, WAIN, cz+nz*.045, ry);             /* the ledge */
+  box(len,.22,.12,MAT.cornice, cx+nx*.06, WALL_H-.11, cz+nz*.06, ry);        /* cornice */
 }
-const sill=new Mesh(new BoxGeometry(30,.3,.5),WOOD_DK); sill.position.set(0,.15,-12.45); room.add(sill);
+wall(2*HX, 0,-HZ, 0); wall(2*HX, 0,HZ, Math.PI); wall(2*HZ,-HX,0, Math.PI/2); wall(2*HZ,HX,0,-Math.PI/2);
 
-/* side + front walls — kept clear of where the camera flies */
-[-15.5,15.5].forEach(x=>{
-  const w=new Mesh(new BoxGeometry(.5,10,32),WOOD_DK); w.position.set(x,5,1); room.add(w);
+/* the green banquette: along the back wall and down the left wall, broken for the exit */
+function banquette(len,cx,cz,ry){
+  const nx=Math.sin(ry), nz=Math.cos(ry);                                    /* into the room */
+  box(len,.18,.62,MAT.plinth, cx+nx*.31, .09, cz+nz*.31, ry);
+  const seat=box(len,.27,.62,new MeshStandardMaterial({map:tiled(TEX.tuft,len/.9,.6),roughness:.45}),
+                 cx+nx*.31, .315, cz+nz*.31, ry);
+  box(len,.66,.12,new MeshStandardMaterial({map:tiled(TEX.tuft,len/.9,1),roughness:.45}),
+      cx+nx*.06, .78, cz+nz*.06, ry);
+  box(len,.05,.16,MAT.trim, cx+nx*.08, 1.13, cz+nz*.08, ry);                /* capping rail */
+}
+const BACK_END=3.25;                                     /* stops before the corner booth */
+banquette(HX+BACK_END, (-HX+BACK_END)/2, -HZ, 0);
+const DOOR={z0:-0.82, z1:0.12};
+banquette(DOOR.z0+HZ, -HX, (-HZ+DOOR.z0)/2, Math.PI/2);
+banquette(4.45-DOOR.z1, -HX, (DOOR.z1+4.45)/2, Math.PI/2);
+
+/* emergency exit on the left wall */
+box(.06,2.2,DOOR.z1-DOOR.z0-.08, MAT.door, -HX+.03, 1.1, (DOOR.z0+DOOR.z1)/2);
+box(.05,.05,.7, MAT.brass, -HX+.08, 1.05, (DOOR.z0+DOOR.z1)/2);
+const exitSign=new Mesh(new BoxGeometry(.05,.18,.46),[MAT.door,MAT.door,MAT.door,MAT.door,
+  new MeshBasicMaterial({map:TEX.exit}),new MeshBasicMaterial({map:TEX.exit})]);
+exitSign.position.set(-HX+.06,2.42,(DOOR.z0+DOOR.z1)/2); room.add(exitSign);
+
+/* the big window on the left wall, over tables 30-32 */
+const WIN={z:-3.9, w:2.1, y0:1.2, y1:2.7};
+const pane=new Mesh(new PlaneGeometry(WIN.w,WIN.y1-WIN.y0),MAT.daylight);
+pane.position.set(-HX+.02,(WIN.y0+WIN.y1)/2,WIN.z); pane.rotation.y=Math.PI/2; room.add(pane);
+[[WIN.y0,1],[WIN.y1,1]].forEach(([y])=>box(.12,.08,WIN.w+.16,MAT.frame,-HX+.05,y,WIN.z));
+[-1,1].forEach(s=>box(.12,WIN.y1-WIN.y0,.08,MAT.frame,-HX+.05,(WIN.y0+WIN.y1)/2,WIN.z+s*(WIN.w/2)));
+
+/* framed pictures with picture lights above the back banquette */
+[-4.3,-3.05,-1.65,0.1,1.75,2.85].forEach((x,i)=>{
+  const w=i%2?.52:.66, h=i%2?.62:.54, y=2.3;
+  box(w+.08,h+.08,.04,MAT.frame,x,y,-HZ+.025);
+  const art=new Mesh(new PlaneGeometry(w,h),new MeshStandardMaterial({map:picTex(i),roughness:.9}));
+  art.position.set(x,y,-HZ+.05); room.add(art);
+  box(.3,.03,.08,MAT.brass,x,y+h/2+.16,-HZ+.07);
 });
-const front=new Mesh(new BoxGeometry(31,10,.5),WOOD_DK); front.position.set(0,5,16.5); room.add(front);
 
-/* log posts, standing in the aisles between the table columns */
-const postGeo=new CylinderGeometry(.30,.36,7.6,10);
-const POSTS=[];
-[-9.5,-1.8,1.8,9.5].forEach(x=>[-5.6,1.6,8.4].forEach(z=>POSTS.push([x,z])));
-POSTS.forEach(([x,z])=>{
-  const p=new Mesh(postGeo,WOOD); p.position.set(x,3.8,z); room.add(p);
-  /* greenery wrapping the post */
-  for(let i=0;i<7;i++){
-    const b=new Mesh(new SphereGeometry(.26+Math.random()*.20,6,5),GREEN);
-    b.position.set(x+(Math.random()-.5)*0.9,2.4+Math.random()*4.8,z+(Math.random()-.5)*0.9);
-    b.scale.y=.65; room.add(b);
+/* schoolhouse pendants */
+const globeGeo=new SphereGeometry(.21,18,14);
+const PEND=[];
+[-2.9,0,2.9].forEach(x=>[-4.4,-1.0,2.6].forEach(z=>PEND.push([x,z])));
+PEND.forEach(([x,z],i)=>{
+  const cord=new Mesh(new CylinderGeometry(.008,.008,1.05,5),MAT.iron); cord.position.set(x,WALL_H-.52,z); room.add(cord);
+  const cap=new Mesh(new CylinderGeometry(.05,.09,.1,12),MAT.brass); cap.position.set(x,WALL_H-1.08,z); room.add(cap);
+  const gl=new Mesh(globeGeo,MAT.globe); gl.position.set(x,WALL_H-1.3,z); gl.scale.y=1.15; room.add(gl);
+  if(i%2===0){ const L=new PointLight(0xffd6a0,7,10,1.8); L.position.set(x,WALL_H-1.45,z); room.add(L); }
+});
+
+/* ===================== tables and seats ===================== */
+/* Seat order matches the 2D chart exactly: left side top->bottom, right side
+   top->bottom, top side left->right, bottom side left->right, then the end
+   chairs (vertical: top then bottom; horizontal: left then right). Round tables
+   go round from a0. "bench" seats are on the banquette or in a booth. */
+const TW=0.8, CH=0.42, BN=0.32;             /* table width, chair and bench seat offsets past the edge */
+const GROUPS=[
+  {id:20, label:'Tables 20–23', cx:-0.5,  cz:-HZ+TW/2+BN+0.40, o:'h', L:3.0, sides:{top:4,bottom:4}, caps:'h', bench:'top', wall:'back'},
+  {id:30, label:'Tables 30–32', cx:-HX+TW/2+BN+0.40, cz:-3.03, o:'v', L:2.25, sides:{left:3,right:3}, bench:'left', wall:'left'},
+  {id:33, label:'Tables 33–34', cx:-HX+TW/2+BN+0.40, cz:2.2,   o:'v', L:1.5,  sides:{left:2,right:2}, caps:'v', bench:'left', wall:'left'},
+  {id:11, label:'Tables 11–15', cx:4.2,   cz:-0.13, o:'v', L:3.4, sides:{left:4,right:4}, caps:'v'},
+  {id:43, label:'Tables 43–44', cx:-1.82, cz:0.19,  o:'v', L:2.8, sides:{left:4,right:4}, caps:'v'},
+  {id:41, label:'Tables 40–41', cx:1.12,  cz:0.19,  o:'v', L:2.8, sides:{left:4,right:4}, caps:'v'},
+  {id:16, label:'Table 16 (booth)', cx:3.77, cz:5.33, o:'v', L:1.9, W:0.75, sides:{left:3,right:3}, booth:true},
+  {id:10, label:'Table 10 (booth)', round:true, cx:4.41, cz:-5.62, r:0.55, n:5, a0:Math.PI/2, booth:true, corner:-Math.PI/4},
+  {id:35, label:'Table 35 (booth)', round:true, cx:-4.18, cz:5.5, r:0.55, n:6, a0:Math.PI/6, booth:true, corner:3*Math.PI/4}
+];
+const SPARES=[
+  {id:24, label:'Table 24', round:true, cx:-4.55, cz:-5.55, r:0.42},
+  {id:42, label:'Table 42', square:true, cx:-0.26, cz:-2.9, s:0.72}
+];
+const GBY={}; GROUPS.concat(SPARES).forEach(g=>GBY[g.id]=g);
+const GL=t=>GBY[t]?GBY[t].label:'Table '+t;
+
+/* tables the chart has moved: free tables move freely, wall tables only slide along
+   their wall, booths never move */
+GROUPS.concat(SPARES).forEach(g=>{
+  const p=PLAN.pos[g.id]; if(!p||g.booth) return;
+  if(g.wall==='back') g.cx+=p.dx*K;
+  else if(g.wall==='left') g.cz+=p.dy*K;
+  else { g.cx+=p.dx*K; g.cz+=p.dy*K; }
+});
+
+function faceTo(px,pz,tx,tz){ return Math.atan2(tx-px,tz-pz); }
+function seatsFor(g){
+  const out=[];
+  if(g.round){
+    const arcIn=a=>{ let d=Math.atan2(Math.sin(a-g.corner),Math.cos(a-g.corner)); return Math.abs(d)<=Math.PI*2/3; };
+    for(let i=0;i<g.n;i++){
+      const a=g.a0+i*2*Math.PI/g.n, bench=g.booth&&arcIn(a), R=g.r+(bench?0.40:CH);
+      const x=g.cx+R*Math.cos(a), z=g.cz+R*Math.sin(a);
+      out.push({x,z,face:faceTo(x,z,g.cx,g.cz),bench,
+                nx:g.cx+(g.r-.18)*Math.cos(a), nz:g.cz+(g.r-.18)*Math.sin(a)});
+    }
+    return out;
   }
-});
-[-5.6,1.6,8.4].forEach(z=>{                           /* beams across */
-  const b=new Mesh(new BoxGeometry(24,.44,.44),WOOD); b.position.set(0,7.5,z); room.add(b);
-});
-[-9.5,-1.8,1.8,9.5].forEach(x=>{
-  const b=new Mesh(new BoxGeometry(.44,.44,20),WOOD); b.position.set(x,7.9,1.4); room.add(b);
-});
-
-/* hanging lanterns */
-const lanternMat=new MeshBasicMaterial({color:0xffcf8a});
-POSTS.forEach(([x,z],i)=>{
-  if(i%2) return;
-  const cord=new Mesh(new CylinderGeometry(.02,.02,1.5,4),WOOD_DK);
-  cord.position.set(x,7.4,z+3.1); room.add(cord);
-  const l=new Mesh(new BoxGeometry(.34,.46,.34),lanternMat);
-  l.position.set(x,6.5,z+3.1); room.add(l);
-  const pl=new PointLight(0xffb765,7,13,2); pl.position.set(x,6.3,z+3.1); room.add(pl);
-});
-
-/* ===================== tables ===================== */
-/* DEV LAYOUT. Head tables 1-4 run together horizontally, six seats each. Floor
-   tables 5-13 seat eight, four a side, and stand in three columns of three,
-   numbered down each column. Matches the 2D chart's seat numbering: horizontal
-   tables seat 1-3 along the back and 4-6 along the front; floor tables seat 1-4
-   down the left and 5-8 down the right.                                        */
-const TL=2.4, TL8=3.2, TW=0.95, TH=0.76;              /* 6-seat length, 8-seat length, width, height */
-const HEAD_Z=-8, FLOOR_TOP=-4.6;                      /* head table close in front of the windows */
-const COL_X=[-3.6,0,3.6];                             /* ~1m of aisle between columns */
-const tables={};                                      /* id -> {x,z,orient,seats,len} */
-for(let i=0;i<4;i++) tables[i+1]={x:(i-1.5)*TL, z:HEAD_Z, orient:'h', seats:6, len:TL};
-for(let c=0;c<3;c++) for(let r=0;r<3;r++)
-  tables[5+c*3+r]={x:COL_X[c], z:FLOOR_TOP+TL8*(r+0.5), orient:'v', seats:8, len:TL8};
-
-/* `face` is the group's rotation.y, and a person's local +z is the way they look,
-   so everyone has to be turned toward the table they are sitting at. */
-function seatPos(t,s){                                /* -> {x,z,face} */
-  const T=tables[t], per=T.seats/2, i=(s-1)%per, side=s<=per?-1:1;
-  const off=(i-(per-1)/2)*0.8;                        /* chairs 0.8m apart, centred on the table */
-  if(T.orient==='h') return {x:T.x+off, z:T.z+side*0.95, face:side<0?0:Math.PI};
-  return {x:T.x+side*0.95, z:T.z+off, face:side<0?Math.PI/2:-Math.PI/2};
+  const W=g.W||TW, vert=g.o==='v', sd=g.sides;
+  const off=side=>W/2+((g.booth||side===g.bench)?BN:CH);
+  /* t in [0,1] along the long axis -> world point on the centre line */
+  const along=t=>vert?{x:g.cx, z:g.cz-g.L/2+g.L*t}:{x:g.cx-g.L/2+g.L*t, z:g.cz};
+  function side(n,name,sx,sz){                                  /* sx,sz: unit normal out of that side */
+    for(let i=0;i<n;i++){
+      const c=along((i+0.5)/n), d=off(name), x=c.x+sx*d, z=c.z+sz*d;
+      out.push({x,z,face:faceTo(x,z,c.x,c.z),bench:!!g.booth||name===g.bench,
+                nx:c.x+sx*(W/2-.2), nz:c.z+sz*(W/2-.2)});
+    }
+  }
+  if(vert){ if(sd.left) side(sd.left,'left',-1,0); if(sd.right) side(sd.right,'right',1,0); }
+  else    { if(sd.top)  side(sd.top,'top',0,-1);   if(sd.bottom) side(sd.bottom,'bottom',0,1); }
+  const end=(sign)=>{                                           /* end chair: -1 first end, +1 second */
+    const c=along(sign<0?0:1), x=c.x+(vert?0:sign*CH), z=c.z+(vert?sign*CH:0);
+    out.push({x,z,face:faceTo(x,z,g.cx,g.cz),flex:true,
+              nx:c.x-(vert?0:sign*.2), nz:c.z-(vert?sign*.2:0)});
+  };
+  if(g.caps){ end(-1); end(1); }
+  return out;
 }
 
-const candleMat=new MeshBasicMaterial({color:0xffd79a});
-const flowerMats=[0xd98c9a,0xe8dcc8,0xc4536a,0xf0e2d0].map(c=>new MeshStandardMaterial({color:c,roughness:.9}));
-Object.entries(tables).forEach(([id,T])=>{
-  const g=new Group();
-  const lx=T.orient==='h'?T.len:TW, lz=T.orient==='h'?TW:T.len;
-  const top=new Mesh(new BoxGeometry(lx,.09,lz),TABLETOP); top.position.y=TH; g.add(top);
-  /* legs */
-  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{
-    const l=new Mesh(new BoxGeometry(.1,TH,.1),WOOD_DK);
-    l.position.set(sx*(lx/2-.16),TH/2,sz*(lz/2-.16)); g.add(l);
+/* instanced parts, so ~60 chairs and ~60 place settings stay a handful of draw calls */
+const chairParts={seat:[],leg:[],back:[],ring:[],post:[]}, settingParts={napkin:[],glass:[]};
+const _m=new Matrix4(), _p=new Matrix4(), _s=new Matrix4();
+function chairAt(x,z,face){
+  _m.makeRotationY(face).setPosition(x,0,z);
+  const put=(arr,ox,oy,oz,sy)=>{
+    const m=_m.clone().multiply(_p.makeTranslation(ox,oy,oz));
+    if(sy) m.multiply(_s.makeScale(1,sy,1));
+    arr.push(m);
+  };
+  put(chairParts.seat,0,.46,0);
+  [[-.14,-.14],[.14,-.14],[-.14,.14],[.14,.14]].forEach(([a,b])=>put(chairParts.leg,a,.23,b));
+  /* bentwood back: a tall bent hoop with a smaller loop inside, like the saloon's chairs */
+  put(chairParts.back,0,.64,-.17,1.75);
+  put(chairParts.ring,0,.64,-.17,1.5);
+  put(chairParts.post,-.17,.55,-.17); put(chairParts.post,.17,.55,-.17);
+}
+function settingAt(s){
+  _m.makeRotationY(s.face).setPosition(s.nx,.78,s.nz);
+  settingParts.napkin.push(_m.clone());
+  const rx=Math.cos(s.face), rz=-Math.sin(s.face);             /* the guest's right */
+  settingParts.glass.push(new Matrix4().makeTranslation(s.nx+rx*.2+Math.sin(s.face)*.06,.84,s.nz+rz*.2+Math.cos(s.face)*.06));
+}
+
+const flowerMats=[0xe8742f,0xf2b631,0xf7e3b5,0x4d7a3a].map(c=>M(c,{roughness:.9}));
+function centrepiece(x,z){
+  const vase=new Mesh(new CylinderGeometry(.05,.04,.16,10),MAT.glass); vase.position.set(x,.84,z); room.add(vase);
+  for(let i=0;i<6;i++){
+    const f=new Mesh(new SphereGeometry(.045+Math.random()*.02,6,5),flowerMats[i%4]);
+    f.position.set(x+(Math.random()-.5)*.16,.96+Math.random()*.1,z+(Math.random()-.5)*.16); room.add(f);
+  }
+  [-.18,.18].forEach(d=>{ const c=new Mesh(new CylinderGeometry(.03,.03,.07,8),MAT.candle); c.position.set(x+d,.81,z-d*.4); room.add(c); });
+}
+
+function pedestal(x,z){
+  const col=new Mesh(new CylinderGeometry(.04,.05,.72,8),MAT.iron); col.position.set(x,.37,z); room.add(col);
+  [0,Math.PI/2].forEach(r=>box(.52,.035,.06,MAT.iron,x,.02,z,r));
+}
+
+function roundBooth(g){
+  const segs=12, span=Math.PI*4/3, R=g.r+.40;
+  for(let i=0;i<segs;i++){
+    const a=g.corner-span/2+(i+0.5)*span/segs, len=2*Math.PI*(R+.1)*(span/segs)/(2*Math.PI)+.02;
+    const ry=-a-Math.PI/2, cx=g.cx+R*Math.cos(a), cz=g.cz+R*Math.sin(a);
+    box(len,.18,.56,MAT.plinth,cx,.09,cz,ry);
+    box(len,.27,.56,MAT.leather,cx,.315,cz,ry);
+    const bx=g.cx+(R+.33)*Math.cos(a), bz=g.cz+(R+.33)*Math.sin(a);
+    box(len+.03,.7,.12,MAT.leather,bx,.8,bz,ry);
+    box(len+.03,.06,.16,MAT.trim,bx,1.17,bz,ry);
+  }
+}
+function rectBooth(g){
+  const W=g.W||TW;
+  [-1,1].forEach(sx=>{
+    const x=g.cx+sx*(W/2+.30);
+    box(.56,.18,g.L,MAT.plinth,x,.09,g.cz); box(.56,.27,g.L,MAT.leather,x,.315,g.cz);
+    const bx=g.cx+sx*(W/2+.62);
+    box(.12,.72,g.L,new MeshStandardMaterial({map:tiled(TEX.tuft,g.L/.9,1),roughness:.45}),bx,.81,g.cz);
+    box(.16,1.35,g.L+.04,MAT.frame,bx+sx*.1,.68,g.cz);                    /* tall dark booth back */
   });
-  /* linen runner + candles + a low arrangement */
-  const run=new Mesh(new BoxGeometry(T.orient==='h'?lx:.42,.02,T.orient==='h'?.42:lz),LINEN);
-  run.position.y=TH+.05; g.add(run);
-  for(let i=-1;i<=1;i++){
-    const cd=new Mesh(new CylinderGeometry(.045,.045,.13,6),candleMat);
-    cd.position.set(T.orient==='h'?i*.7:0, TH+.12, T.orient==='h'?0:i*.7); g.add(cd);
-    const pl=new PointLight(0xffa64d,1.5,3.2,2);
-    pl.position.set(cd.position.x,TH+.28,cd.position.z); g.add(pl);
+}
+
+const SEATS={};                                           /* 't20s3' -> seat record */
+GROUPS.forEach(g=>{
+  const seats=seatsFor(g);
+  seats.forEach((s,i)=>{ SEATS['t'+g.id+'s'+(i+1)]=s; });
+  /* table */
+  if(g.round){
+    const top=new Mesh(new CylinderGeometry(g.r,g.r,.045,28),MAT.top); top.position.set(g.cx,.75,g.cz); room.add(top);
+    pedestal(g.cx,g.cz); centrepiece(g.cx,g.cz);
+  }else{
+    const W=g.W||TW, vert=g.o==='v';
+    box(vert?W:g.L,.045,vert?g.L:W,MAT.top,g.cx,.75,g.cz);
+    const k=g.L>2.2?[-1,1]:[0];
+    k.forEach(s=>pedestal(g.cx+(vert?0:s*(g.L/2-.4)),g.cz+(vert?s*(g.L/2-.4):0)));
+    const n=Math.max(1,Math.round(g.L/1.1));
+    for(let i=0;i<n;i++){ const t=(i+.5)/n-.5; centrepiece(g.cx+(vert?0:t*g.L),g.cz+(vert?t*g.L:0)); }
   }
-  for(let i=0;i<7;i++){
-    const f=new Mesh(new SphereGeometry(.055,5,4),flowerMats[i%4]);
-    f.position.set(T.orient==='h'?(Math.random()-.5)*(T.len-.7):(Math.random()-.5)*.3, TH+.15,
-                   T.orient==='h'?(Math.random()-.5)*.3:(Math.random()-.5)*(T.len-.7)); g.add(f);
-  }
-  /* chairs */
-  for(let s=1;s<=T.seats;s++){
-    const p=seatPos(+id,s);
-    const seat=new Mesh(new BoxGeometry(.44,.06,.44),WOOD_DK);
-    seat.position.set(p.x,.46,p.z); room.add(seat);
-    const back=new Mesh(new BoxGeometry(.44,.52,.06),WOOD_DK);
-    back.position.set(p.x,.74,p.z); back.rotation.y=p.face;
-    back.translateZ(-.22); room.add(back);
-  }
-  g.position.set(T.x,0,T.z); room.add(g);
+  if(g.booth){ g.round?roundBooth(g):rectBooth(g); }
+  /* chairs where the seat isn't a bench; end chairs only when someone is in them */
+  seats.forEach((s,i)=>{
+    const taken=!!PLAN.assign['t'+g.id+'s'+(i+1)];
+    if(s.flex&&!taken) return;
+    if(!s.bench) chairAt(s.x,s.z,s.face);
+    settingAt(s);
+  });
+  const L=new PointLight(0xffb36b,1.2,3.2,2); L.position.set(g.cx,1.05,g.cz); room.add(L);
 });
+SPARES.forEach(g=>{
+  if(g.round){ const top=new Mesh(new CylinderGeometry(g.r,g.r,.045,24),MAT.top); top.position.set(g.cx,.75,g.cz); room.add(top); }
+  else box(g.s,.045,g.s,MAT.top,g.cx,.75,g.cz,Math.PI/4);
+  pedestal(g.cx,g.cz);
+});
+
+function instanced(geo,mat,list){
+  if(!list.length) return;
+  const im=new InstancedMesh(geo,mat,list.length);
+  list.forEach((m,i)=>im.setMatrixAt(i,m)); im.instanceMatrix.needsUpdate=true; room.add(im);
+}
+instanced(new CylinderGeometry(.2,.2,.035,16),MAT.bent,chairParts.seat);
+instanced(new CylinderGeometry(.013,.016,.46,6),MAT.bent,chairParts.leg);
+instanced(new TorusGeometry(.17,.019,6,16,Math.PI),MAT.bent,chairParts.back);
+instanced(new TorusGeometry(.10,.014,6,12,Math.PI),MAT.bent,chairParts.ring);
+instanced(new CylinderGeometry(.017,.017,.18,6),MAT.bent,chairParts.post);
+instanced(new BoxGeometry(.13,.02,.2),MAT.napkin,settingParts.napkin);
+instanced(new CylinderGeometry(.03,.026,.11,10),MAT.glass,settingParts.glass);
 
 /* ===================== people ===================== */
-/* Hair has to be a partial sphere. A full one is wider than the head and simply
-   swallows the face. The crown stops just above the eyes (which sit at theta
-   0.42pi); the long piece skips a wedge centred on the face at phi = pi/2. */
+const SKIN={pale:0xf0d0b4,asian:0xe8c49a}, HAIRS=[0x2b1d12,0x3c2a18,0x6b4a2a,0x8c6239,0xc9a05a,0x1a1310], GREY=0xa9a29a;
+const OUTFITS={
+  'couple':{m:0x1a1a1e,f:0xfdfbf6}, 'belgian':{tex:'belgium'}, 'bu':{m:0xb8332c,f:0xcc4a40},
+  'cu':{tex:'cu'}, 'church':{tex:'cross'}, 'danville church':{tex:'cross',tint:0x9aa88f},
+  'camping':{tex:'plaid'}, 'mark camping':{tex:'plaid2'}, 'skeena':{m:0x3f6f8c,f:0x5b8aa6},
+  'doctor':{m:0x2f7f7a,f:0x3d918b}, 'resident doctor':{m:0x4a7fa8,f:0x5b93bd}, 'med school':{m:0x4d7f5a,f:0x5f9470},
+  'danville':{m:0x8a9a7b,f:0x9fae90}, 'dc':{m:0x2a3550,f:0x3a4767}, 'mark family':{m:0x33333a,f:0x6b5b6e},
+  'main':{m:0x4a4a52,f:0xc99aa0}
+};
 const FACE_GAP=0.66;
 const GEO={
-  torso: new CylinderGeometry(.19,.25,.62,10),
-  head:  new SphereGeometry(.125,16,14),
-  crown: new SphereGeometry(.133,14,8,0,Math.PI*2,0,Math.PI*0.38),
-  long:  new SphereGeometry(.150,14,12,Math.PI/2+FACE_GAP,Math.PI*2-FACE_GAP*2,0,Math.PI*0.92),
-  bun:   new SphereGeometry(.085,8,7),
-  arm:   new CylinderGeometry(.055,.055,.46,6),
-  neck:  new CylinderGeometry(.055,.06,.09,6)
+  torso:new CylinderGeometry(.19,.25,.62,10), head:new SphereGeometry(.125,16,14),
+  crown:new SphereGeometry(.133,14,8,0,Math.PI*2,0,Math.PI*0.38),
+  long:new SphereGeometry(.150,14,12,Math.PI/2+FACE_GAP,Math.PI*2-FACE_GAP*2,0,Math.PI*0.92),
+  bun:new SphereGeometry(.085,8,7), arm:new CylinderGeometry(.055,.055,.46,6), neck:new CylinderGeometry(.055,.06,.09,6)
 };
-const skinMat={ pale:new MeshStandardMaterial({color:SKIN.pale,roughness:.72}),
-                asian:new MeshStandardMaterial({color:SKIN.asian,roughness:.72}) };
-
-/* A sphere's +z pole sits at u=0.25, and canvas top maps to the sphere's top,
-   so the face is painted a quarter of the way across and a little above centre.
-   Doing it in the texture keeps 94 guests at one draw call each. */
+const skinMat={pale:M(SKIN.pale,{roughness:.72}),asian:M(SKIN.asian,{roughness:.72})};
 function faceTex(hex){
   return makeTex((x,w,h)=>{
     x.fillStyle='#'+hex.toString(16).padStart(6,'0'); x.fillRect(0,0,w,h);
     const cx=w*0.25, eye=h*0.42;
-    x.fillStyle='rgba(223,124,112,.34)';                        /* warm cheeks */
-    [-1,1].forEach(s=>{ x.beginPath(); x.ellipse(cx+s*17,eye+13,7,5.5,0,0,7); x.fill(); });
-    x.fillStyle='#33231a';                                      /* eyes */
-    [-1,1].forEach(s=>{ x.beginPath(); x.ellipse(cx+s*9.5,eye,3.6,5,0,0,7); x.fill(); });
-    x.fillStyle='rgba(255,255,255,.9)';                         /* catchlights */
-    [-1,1].forEach(s=>{ x.beginPath(); x.arc(cx+s*9.5-1.3,eye-1.8,1.4,0,7); x.fill(); });
-    x.strokeStyle='#4a2c1e'; x.lineWidth=2.4; x.lineCap='round';/* smile */
+    x.fillStyle='rgba(223,124,112,.34)'; [-1,1].forEach(s=>{ x.beginPath(); x.ellipse(cx+s*17,eye+13,7,5.5,0,0,7); x.fill(); });
+    x.fillStyle='#33231a'; [-1,1].forEach(s=>{ x.beginPath(); x.ellipse(cx+s*9.5,eye,3.6,5,0,0,7); x.fill(); });
+    x.fillStyle='rgba(255,255,255,.9)'; [-1,1].forEach(s=>{ x.beginPath(); x.arc(cx+s*9.5-1.3,eye-1.8,1.4,0,7); x.fill(); });
+    x.strokeStyle='#4a2c1e'; x.lineWidth=2.4; x.lineCap='round';
     x.beginPath(); x.arc(cx,eye+7,8.5,0.2*Math.PI,0.8*Math.PI); x.stroke();
   },256,128);
 }
-const faceMat={ pale:new MeshStandardMaterial({map:faceTex(SKIN.pale),roughness:.72}),
-                asian:new MeshStandardMaterial({map:faceTex(SKIN.asian),roughness:.72}) };
-const hairMats={};
-function hairMat(c){ return hairMats[c]||(hairMats[c]=new MeshStandardMaterial({color:c,roughness:.94})); }
+const faceMat={pale:M(0xffffff,{map:faceTex(SKIN.pale),roughness:.72}),asian:M(0xffffff,{map:faceTex(SKIN.asian),roughness:.72})};
+const hairMats={}; const hairMat=c=>hairMats[c]||(hairMats[c]=M(c,{roughness:.94}));
 const shirtCache={};
 function shirtMat(tag,sex){
   const key=tag+'|'+sex, o=OUTFITS[tag]||OUTFITS.main;
   if(shirtCache[key]) return shirtCache[key];
-  let m;
-  if(o.tex) m=new MeshStandardMaterial({map:TEX[o.tex],roughness:.85,
-                                        color:o.tint!==undefined?o.tint:0xffffff});
-  else m=new MeshStandardMaterial({color:sex==='m'?o.m:o.f,roughness:.85});
-  return shirtCache[key]=m;
+  return shirtCache[key]= o.tex ? M(o.tint!==undefined?o.tint:0xffffff,{map:TEX[o.tex],roughness:.85})
+                                : M(sex==='m'?o.m:o.f,{roughness:.85});
 }
-
 const people=[];
 function addPerson(g,seat){
-  const p=seatPos(+seat.match(/t(\d+)/)[1], +seat.match(/s(\d+)/)[1]);
-  const tag=g.tags[0]||'main';
-  const isAsian=ASIAN.has(g.name);
-  const older=g.tags.includes('parents');
+  const p=SEATS[seat]; if(!p) return;
+  const tag=g.tags[0]||'main', isAsian=ASIAN.has(g.name), older=g.tags.includes('parents');
   const skin=isAsian?skinMat.asian:skinMat.pale;
   const hc=older?GREY:(isAsian?0x140f0c:HAIRS[(g.name.charCodeAt(0)+g.name.length)%HAIRS.length]);
-
-  const grp=new Group();
-  grp.position.set(p.x,0,p.z);
-  grp.rotation.y=p.face;
-
-  const torso=new Mesh(GEO.torso,shirtMat(tag,g.sex));
-  torso.position.y=1.02; torso.scale.set(g.sex==='m'?1.06:0.95,1,g.sex==='m'?1.02:0.95);
-  grp.add(torso);
-
+  const grp=new Group(); grp.position.set(p.x,0,p.z); grp.rotation.y=p.face;
+  const torso=new Mesh(GEO.torso,shirtMat(tag,g.sex)); torso.position.y=1.02;
+  torso.scale.set(g.sex==='m'?1.06:0.95,1,g.sex==='m'?1.02:0.95); grp.add(torso);
   const neck=new Mesh(GEO.neck,skin); neck.position.y=1.37; grp.add(neck);
-  const head=new Mesh(GEO.head,isAsian?faceMat.asian:faceMat.pale);
-  head.position.y=1.50; grp.add(head);
-
+  const head=new Mesh(GEO.head,isAsian?faceMat.asian:faceMat.pale); head.position.y=1.50; grp.add(head);
   const hm=hairMat(hc);
-  const crown=new Mesh(GEO.crown,hm);
-  crown.position.y=1.502; crown.scale.y=g.sex==='m'?1.0:1.06; grp.add(crown);
-  const up=g.sex==='f'&&(g.name.length%3===0);        /* a few wear it up */
-  if(g.sex==='f'&&!up){                               /* the rest wear it long */
-    const back=new Mesh(GEO.long,hm);
-    back.position.set(0,1.500,-.010); back.scale.set(1,1.04,1.06); grp.add(back);
-  }
+  const crown=new Mesh(GEO.crown,hm); crown.position.y=1.502; crown.scale.y=g.sex==='m'?1.0:1.06; grp.add(crown);
+  const up=g.sex==='f'&&(g.name.length%3===0);
+  if(g.sex==='f'&&!up){ const b=new Mesh(GEO.long,hm); b.position.set(0,1.5,-.01); b.scale.set(1,1.04,1.06); grp.add(b); }
   if(up){ const bun=new Mesh(GEO.bun,hm); bun.position.set(0,1.555,-.125); grp.add(bun); }
-  const arms=[-1,1].map(s=>{                           /* arms resting toward the table */
-    const a=new Mesh(GEO.arm,shirtMat(tag,g.sex));
-    a.position.set(s*.245,1.02,.10); a.rotation.x=-0.55; a.rotation.z=s*0.12; grp.add(a);
-    return a;
-  });
-
-  grp.userData={guest:g,seat:seat,arms:arms,
-                base:{x:p.x,z:p.z,face:p.face}};        /* pose to return to after standing */
+  [-1,1].forEach(s=>{ const a=new Mesh(GEO.arm,shirtMat(tag,g.sex)); a.position.set(s*.245,1.02,.10);
+    a.rotation.x=-0.55; a.rotation.z=s*0.12; grp.add(a); });
+  grp.userData={guest:g,seat:seat};
   room.add(grp); people.push(grp);
 }
 Object.entries(PLAN.assign).forEach(([seat,gid])=>{ if(byId[gid]) addPerson(byId[gid],seat); });
-document.getElementById('hudsub').textContent =
-  people.length+' guests seated'+(PLAN.name?' · '+PLAN.name:'');
+document.getElementById('hudsub').textContent=people.length+' guests seated'+(PLAN.name?' · '+PLAN.name:'');
 
-/* ===================== picking ===================== */
-const ray=new Raycaster(), ptr=new Vector2();
-const card=document.getElementById('card');
+/* ===================== picking + nameplate ===================== */
+const ray=new Raycaster(), ptr=new Vector2(), card=document.getElementById('card');
+const DIET={'vegetarian':1,'pescatarian':1,'no fish':1};
 function tagColor(t){
-  if(t==='vegetarian') return {bg:'#e3efdb', fg:'#3d6b2e'};   /* matches the chart */
+  if(DIET[t]) return {bg:'#e3efdb', fg:'#3d6b2e'};
   let h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))%360;
-  return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'}; }
-let picked=null;                                      /* nameplate follows this guest */
-const anchor=new Vector3();
+  return {bg:'hsl('+h+' 62% 91%)', fg:'hsl('+h+' 55% 27%)'};
+}
+/* measure the canvas, never divide by a zero-sized window (see the wedding view) */
+function viewport(){ const r=renderer.domElement.getBoundingClientRect();
+  return {w:r.width||innerWidth||1, h:r.height||innerHeight||1, left:r.left, top:r.top}; }
+let picked=null; const anchor=new Vector3();
 function placeCard(){
-  if(!picked){ return; }
+  if(!picked) return;
   const v=viewport();
   anchor.set(picked.position.x,1.78,picked.position.z).project(camera);
-  if(anchor.z>1||!Number.isFinite(anchor.x)||!Number.isFinite(anchor.y)){
-    card.classList.remove('on'); return; }   /* behind the camera, or not measurable yet */
+  if(anchor.z>1||!Number.isFinite(anchor.x)||!Number.isFinite(anchor.y)){ card.classList.remove('on'); return; }
   card.style.left=(v.left+(anchor.x*0.5+0.5)*v.w)+'px';
   card.style.top =(v.top +(-anchor.y*0.5+0.5)*v.h)+'px';
   card.classList.add('on');
@@ -55016,11 +55051,10 @@ function pick(cx,cy){
   ray.setFromCamera(ptr,camera);
   const hit=ray.intersectObjects(people,true)[0];
   if(!hit){ picked=null; card.classList.remove('on'); return; }
-  let o=hit.object; while(o&&!o.userData.guest) o=o.parent;
-  if(!o) return;
+  let o=hit.object; while(o&&!o.userData.guest) o=o.parent; if(!o) return;
   const g=o.userData.guest, t=o.userData.seat.match(/t(\d+)/)[1], s=o.userData.seat.match(/s(\d+)/)[1];
   document.getElementById('cnm').textContent=g.name;
-  document.getElementById('cwh').textContent='Table '+t+' · seat '+s+(t<=4?' · head table':'');
+  document.getElementById('cwh').textContent=GL(t)+' · seat '+s+(SEATS[o.userData.seat].bench?' · on the bench':'');
   const tg=document.getElementById('ctg'); tg.innerHTML='';
   g.tags.forEach(x=>{ const c=tagColor(x), e=document.createElement('span');
     e.textContent=x; e.style.background=c.bg; e.style.color=c.fg; tg.appendChild(e); });
@@ -55030,164 +55064,47 @@ let downAt=null;
 renderer.domElement.addEventListener('pointerdown',e=>{downAt={x:e.clientX,y:e.clientY,t:Date.now()};});
 renderer.domElement.addEventListener('pointerup',e=>{
   if(!downAt) return;
-  const moved=Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y);
-  if(moved<6&&Date.now()-downAt.t<600) pick(e.clientX,e.clientY);   /* a tap, not a drag */
+  if(Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<6&&Date.now()-downAt.t<600) pick(e.clientX,e.clientY);
   downAt=null;
 });
 
-/* ===================== camera presets ===================== */
+/* ===================== camera ===================== */
 const VIEWS={
-  room:  {p:[0,6.0,12.5], t:[0,1.2,-2]},
-  head:  {p:[0,2.4,-3.0], t:[0,1.35,-8]},
-  floor: {p:[-7.0,2.0,5.5],t:[-1,1.15,-1]},
-  top:   {p:[0,22,3],     t:[0,0,-1]}
+  room:  {p:[-1.2,2.25,6.1], t:[0.3,1.15,-3.6]},     /* from the front, like the photo */
+  head:  {p:[-0.5,1.75,-2.7],t:[-0.5,1.0,-5.9]},
+  booth: {p:[1.9,1.85,-2.4], t:[4.3,0.9,-5.4]},
+  top:   {p:[0,14.5,3.2],    t:[0,0,0]}
 };
 let anim=null;
 function goto(v,instant){
   const V=VIEWS[v];
   if(instant){ camera.position.set(...V.p); controls.target.set(...V.t); controls.update(); return; }
-  anim={from:camera.position.clone(),to:new Vector3(...V.p),
-        tf:controls.target.clone(),tt:new Vector3(...V.t),k:0};
+  anim={from:camera.position.clone(),to:new Vector3(...V.p),tf:controls.target.clone(),tt:new Vector3(...V.t),k:0};
 }
 goto('room',true);
 document.querySelectorAll('#views button').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('#views button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); goto(b.dataset.view); picked=null; card.classList.remove('on');
-    if(standing) endToast();
-  };
+  b.onclick=()=>{ document.querySelectorAll('#views button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); goto(b.dataset.view); picked=null; card.classList.remove('on'); };
 });
 
-/* ===================== Pauline's toast ===================== */
-const SPEECH=[
-  "Hi everyone! I'm Pauline — Sophie's sister — and I have exactly one thing to say about my sister.",
-  "She farts. Constantly. Relentlessly. Like a small Belgian air horn.",
-  "Mark, sweetheart, congratulations. You have married a wind instrument.",
-  "One time when we were very young, we were driving through the mountains, and Sophie let one go in the back seat, and Dad pulled the car over because he genuinely thought the transmission had gone.",
-  "Now. A safety announcement. We are in bear country tonight.",
-  "Bears are attracted to strong smells. So when Sophie starts, do not run. Lie flat. Play dead.",
-  "The bears will assume something has already died in here, and they will be correct.",
-  "And if you are sleeping in the cabin with Sophie tonight, be warned. She farts in her sleep. Rhythmically.",
-  "I shared a room with her for eleven years and I still wake up convinced a duck has gotten in.",
-  "Sophie, I love you more than anything in the world. Mark — run. ... Too late.",
-  "To the bride and groom!"
-];
-const RATE=1.25;                          /* speaking speed; the caption timing follows it */
-const speaker=people.find(p=>p.userData.guest.name==='Pauline Potocnik');
-const capEl=document.getElementById('cap'), capText=document.getElementById('captext');
-const toastBtn=document.getElementById('toastbtn');
-const spotlight=new PointLight(0xffd9a0,0,7,2); scene.add(spotlight);
-let standing=false, standK=0, lineTimer=null;
-
-let voice=null;
-function pickVoice(){
-  if(!window.speechSynthesis) return;
-  const vs=speechSynthesis.getVoices()||[];
-  voice = vs.find(v=>/samantha|zira|karen|moira|tessa|fiona|female|woman/i.test(v.name))
-       || vs.find(v=>/^en/i.test(v.lang)) || vs[0] || null;
-}
-pickVoice();
-if(window.speechSynthesis) speechSynthesis.addEventListener('voiceschanged',pickVoice);
-
-function sayLine(i){
-  if(!standing) return;
-  if(i>=SPEECH.length){ endToast(); return; }
-  const line=SPEECH[i];
-  capText.textContent=line;
-  /* onend is unreliable across browsers, so always arm a fallback timer. Its
-     estimate is derived from RATE: if the timer fires early the next line is
-     spoken over the top of this one and the captions drift out of sync. */
-  const words=line.split(/\s+/).length;
-  const est=Math.max(1600, (words/(RATE*2.3))*1000);
-  let moved=false;
-  const next=()=>{ if(moved) return; moved=true; clearTimeout(lineTimer); sayLine(i+1); };
-  lineTimer=setTimeout(next, est+700);
-  if(window.speechSynthesis){
-    const u=new SpeechSynthesisUtterance(line);
-    u.pitch=2; u.rate=RATE;                /* squeaky, quick but followable */
-    if(voice) u.voice=voice;
-    u.onend=next; u.onerror=next;
-    try{ speechSynthesis.speak(u); }catch(e){}
-  }
-}
-function startToast(){
-  if(!speaker) return;
-  standing=true;
-  toastBtn.classList.add('live');
-  toastBtn.innerHTML='&#9632; Stop';
-  picked=null; card.classList.remove('on');
-  capEl.classList.add('on');
-  const b=speaker.userData.base, fw={x:Math.sin(b.face),z:Math.cos(b.face)};
-  anim={from:camera.position.clone(),
-        to:new Vector3(b.x+fw.x*2.9, 2.05, b.z+fw.z*2.9),
-        tf:controls.target.clone(), tt:new Vector3(b.x,1.55,b.z), k:0};
-  sayLine(0);
-}
-function endToast(){
-  standing=false;
-  clearTimeout(lineTimer);
-  if(window.speechSynthesis){ try{ speechSynthesis.cancel(); }catch(e){} }
-  toastBtn.classList.remove('live');
-  toastBtn.innerHTML='&#129346; Pauline&rsquo;s toast';
-  capEl.classList.remove('on');
-}
-toastBtn.onclick=()=>{ standing?endToast():startToast(); };
-
-function animateSpeaker(){
-  if(!speaker) return;
-  const b=speaker.userData.base;
-  standK += ((standing?1:0)-standK)*0.11;
-  if(standK<0.001&&!standing){                 /* fully seated: rest exactly on the mark */
-    speaker.position.set(b.x,0,b.z); speaker.rotation.y=b.face;
-    speaker.userData.arms.forEach(a=>{a.rotation.x=-0.55;});
-    spotlight.intensity=0; return;
-  }
-  const t=performance.now()/1000;
-  speaker.position.y=standK*0.42;                       /* rise out of the chair */
-  speaker.position.x=b.x-Math.sin(b.face)*0.16*standK;  /* and step back from the table */
-  speaker.position.z=b.z-Math.cos(b.face)*0.16*standK;
-  speaker.rotation.y=b.face+Math.sin(t*2.1)*0.07*standK;
-  speaker.userData.arms.forEach((a,i)=>{                 /* gesturing while she talks */
-    a.rotation.x=-0.55+standK*(-0.30+Math.sin(t*3.2+i*1.9)*0.34);
-  });
-  spotlight.position.set(speaker.position.x,2.7,speaker.position.z);
-  spotlight.intensity=standK*8;
-}
-
-/* ===================== loop ===================== */
-/* Measure the canvas rather than the window, and never divide by a zero
-   dimension: a 0 aspect makes the projection matrix NaN and the whole scene
-   vanishes with no way back. Browsers do report 0 mid-rotation. */
-function viewport(){
-  const r=renderer.domElement.getBoundingClientRect();
-  return { w:r.width||innerWidth||1, h:r.height||innerHeight||1, left:r.left, top:r.top };
-}
 function resize(){
-  const v=viewport();
-  if(v.w<2||v.h<2) return;
-  camera.aspect=v.w/v.h; camera.updateProjectionMatrix();
-  renderer.setSize(v.w,v.h,false);
+  const v=viewport(); if(v.w<2||v.h<2) return;
+  camera.aspect=v.w/v.h; camera.updateProjectionMatrix(); renderer.setSize(v.w,v.h,false);
 }
 addEventListener('resize',resize);
 addEventListener('orientationchange',()=>setTimeout(resize,120));
+
 function tick(){
   requestAnimationFrame(tick);
-  if(anim){
-    anim.k=Math.min(1,anim.k+0.028);
-    const e=1-Math.pow(1-anim.k,3);
-    camera.position.lerpVectors(anim.from,anim.to,e);
-    controls.target.lerpVectors(anim.tf,anim.tt,e);
-    if(anim.k>=1) anim=null;
-  }
-  controls.update();
-  animateSpeaker();
-  placeCard();                       /* keep the nameplate over their head as the view moves */
-  renderer.render(scene,camera);
+  if(anim){ anim.k=Math.min(1,anim.k+0.028); const e=1-Math.pow(1-anim.k,3);
+    camera.position.lerpVectors(anim.from,anim.to,e); controls.target.lerpVectors(anim.tf,anim.tt,e);
+    if(anim.k>=1) anim=null; }
+  controls.update(); placeCard(); renderer.render(scene,camera);
 }
 tick();
 const loadEl=document.getElementById('loading');
 requestAnimationFrame(()=>loadEl.classList.add('done'));
-setTimeout(()=>{loadEl.style.display='none';},1400);   /* never let it linger */
+setTimeout(()=>{loadEl.style.display='none';},1400);
 
-window.VENUE={scene,camera,controls,people,room,tables,seatPos,goto};   /* handle for inspection */
+window.VENUE={scene,camera,controls,people,room,GROUPS,SEATS,goto};     /* handle for inspection */
 </script>
