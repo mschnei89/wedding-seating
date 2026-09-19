@@ -122,7 +122,7 @@
   .sheet{display:none}
   .mobonly{display:none}
 
-  @media (max-width:860px){
+  @media screen and (max-width:860px){
     .app{display:block;height:auto;overflow:visible}
     body{overflow-x:hidden;background:var(--paper)}
     #main{padding:0 0 92px;overflow:visible}
@@ -243,6 +243,37 @@
     #planwrap{overflow:visible}
     #printtitle{display:block;font:600 15px/1 sans-serif;letter-spacing:.04em;margin:0 0 18px;color:var(--muted)}
   }
+
+  /* ---- allergies: Print view + Roster view only ---- */
+  .rtable .alg{flex:none;font:600 9px/1 sans-serif;padding:3px 5px;border-radius:3px;letter-spacing:.03em;
+    background:#fbe1de;color:#a3342a;border:1px solid #e7b3ad}
+  #allergyleg{display:none}
+  @media print{
+    /* print at desktop layout whatever the paper width, and let the page grow to fit */
+    html,body{height:auto !important;overflow:visible !important}
+    .app{display:block !important;height:auto !important;overflow:visible !important}
+    #main{overflow:visible !important}
+    #mohead,#molegend,#mobar{display:none !important}
+    .seat{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #allergyleg{display:block;font:11px/1.25 sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #allergyleg h3{font:700 11px/1 sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 7px}
+    #allergyleg table{border-collapse:collapse;width:100%}
+    #allergyleg th{font:700 9px/1 sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:left;
+      padding:0 4px 4px;border-bottom:2px solid #000}
+    #allergyleg td{padding:4px;border-bottom:1px solid #777;vertical-align:top}
+    #allergyleg td.ini{font-weight:800;white-space:nowrap}
+    #allergyleg td.num{text-align:center;white-space:nowrap}
+    #allergyleg tr{break-inside:avoid}
+    /* bold circle: heavy double ring + heavy initials, readable in black and white */
+    .seat.allergy{border:4px solid #000;box-shadow:0 0 0 2px #fff,0 0 0 4px #000;font-weight:900;font-size:12px}
+    /* wedding chart: the legend sits in the empty space beside the floor tables */
+    .zone{position:relative}
+    .zone > #allergyleg{position:absolute;right:0;top:22px;width:190px}
+    /* rehearsal: the legend sits beside the room */
+    #printrow{display:flex;align-items:flex-start;gap:24px}
+    #printrow > #planwrap{flex:0 0 auto}
+    #printrow > #allergyleg{flex:0 0 auto;width:2.3in}
+  }
 </style>
 </head>
 <body>
@@ -326,6 +357,7 @@
       <div class="zone">
         <div class="zonelab">Floor &nbsp;&mdash; tables 5&ndash;13 &nbsp;&middot;&nbsp; three columns of three, eight seats each</div>
         <div class="grid" id="floor"></div>
+        <aside id="allergyleg"></aside>
       </div>
     </div></div>
 
@@ -766,7 +798,36 @@ function render(){
     var el=document.querySelector('[data-cnt="'+t.id+'"]');
     if(el) el.textContent=n+' / '+t.seats;
   });
-  renderList(); renderRoster(); renderDesigns();
+  renderList(); renderRoster(); renderDesigns(); renderAllergy();
+}
+
+
+/* ============ allergy legend (print view) ============ */
+var ALLERGY={"Andrew Gatewood": "Shellfish", "Amanda Gatewood": "Vegetarian", "Laura Moodley": "Vegetarian", "Mackenzie Goodrich": "Tree nuts", "Anna Davids": "Gluten free", "Andy Moriarty": "Gluten free, figs, radish", "Ali Wood": "Tomatoes and eggplant", "Levin Wilson": "Dairy free"};
+function renderAllergy(){
+  var byName={}; guests.forEach(function(g){ if(ALLERGY[g.name]) byName[g.name]=g; });
+  document.querySelectorAll('.seat').forEach(function(el){
+    var gid=state.assign[el.dataset.seat];
+    el.classList.toggle('allergy', !!gid && !!ALLERGY[byId[gid].name]);
+  });
+  var rows=Object.keys(byName).map(function(n){
+    var g=byName[n], sid=seatOf(g.id), m=sid&&sid.match(/t(\d+)s(\d+)/);
+    return {g:g, t:m?+m[1]:1e9, s:m?+m[2]:0, txt:ALLERGY[n]};
+  }).sort(function(a,b){return a.t-b.t||a.s-b.s||(a.g.name<b.g.name?-1:1);});
+  var box=document.getElementById('allergyleg');
+  if(!rows.length){ box.innerHTML=''; return; }
+  function esc(x){return String(x).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  box.innerHTML='<h3>Allergies &amp; dietary</h3><table><thead><tr><th>Guest</th><th>Table</th><th>Seat</th><th>Allergy</th></tr></thead><tbody>'
+    + rows.map(function(r){
+        return '<tr><td class="ini">'+esc(initials(r.g.name))+'</td><td class="num">'+(r.t<1e9?r.t:'&ndash;')
+             + '</td><td class="num">'+(r.t<1e9?r.s:'&ndash;')+'</td><td>'+esc(r.txt)+'</td></tr>';
+      }).join('')+'</tbody></table>';
+}
+/* roster view: a red allergy badge beside the name (vegetarian already has its own green one) */
+function addRosterAllergy(li,gid){
+  var g=gid&&byId[gid], txt=g&&ALLERGY[g.name];
+  if(!txt || txt.toLowerCase()==='vegetarian') return;
+  var b=document.createElement('span'); b.className='alg'; b.textContent=txt; li.appendChild(b);
 }
 
 /* ============ guest list ============ */
@@ -858,6 +919,7 @@ function renderRoster(){
         var v=document.createElement('span'); v.className='veg'; v.textContent='vegetarian';
         li.appendChild(v);
       }
+      addRosterAllergy(li,g);
       ul.appendChild(li);
     });
     d.append(h,ul); box.appendChild(d);
