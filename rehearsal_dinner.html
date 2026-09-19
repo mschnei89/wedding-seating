@@ -310,7 +310,7 @@
     .seat.allergy{border:4px solid #000;box-shadow:0 0 0 2px #fff,0 0 0 4px #000;font-weight:900;font-size:12px}
     /* wedding chart: the legend sits in the empty space beside the floor tables */
     .zone{position:relative}
-    .zone > #allergyleg{position:absolute;right:0;top:22px;width:190px}
+    .zone > #allergyleg{position:absolute;right:0;top:22px;width:175px}
     /* rehearsal: the legend sits beside the room */
     #printrow{display:flex;align-items:flex-start;gap:24px}
     #printrow > #planwrap{flex:0 0 auto}
@@ -592,11 +592,11 @@ function SHORT(sid){ var g=GBY[sid.match(/t(\d+)/)[1]]; return g ? g.short : sid
 function seatId(t,s){return 't'+t+'s'+s;}
 
 /* ============ designs + state ============ */
-const KEY='rehearsal-seating-v3';   /* v3: seats on both sides, banquettes and booths */
+const KEY='rehearsal-seating-v4';   /* v4: Belgians on 11-15, church on 33-34, BU in booth 16 */
 const OLDKEY='rehearsal-seating-v0';   /* nothing to migrate */
 /* Starting designs baked into the page, so a first-time visitor sees the real
    plans instead of an empty room. Their own edits then live in their browser. */
-const SEED = /*SEED-START*/{"current":"Rehearsal plan","designs":{"Rehearsal plan":{"assign":{"t20s1":"g21","t20s2":"g0","t20s3":"g1","t20s4":"g45","t20s5":"g22","t20s6":"g20","t20s7":"g19","t20s8":"g46","t20s9":"g18","t20s10":"g44","t41s1":"g2","t41s2":"g48","t41s3":"g49","t41s5":"g3","t41s6":"g47","t41s7":"g50","t10s1":"g4","t10s2":"g5","t10s3":"g6","t10s4":"g7","t10s5":"g51","t43s1":"g29","t43s2":"g38","t43s3":"g40","t43s4":"g33","t43s5":"g30","t43s6":"g39","t43s7":"g41","t11s1":"g12","t11s2":"g14","t11s3":"g43","t11s4":"g16","t11s5":"g13","t11s6":"g15","t11s7":"g42","t11s8":"g17","t30s1":"g23","t30s2":"g27","t30s3":"g25","t30s4":"g24","t30s5":"g28","t30s6":"g26","t16s1":"g8","t16s2":"g11","t16s4":"g9","t16s5":"g10","t35s1":"g36","t35s2":"g37","t35s3":"g31","t35s4":"g32","t35s5":"g34","t35s6":"g35"},"locked":{},"pos":{},"updated":0}}}/*SEED-END*/;
+const SEED = /*SEED-START*/{"current":"Rehearsal plan","designs":{"Rehearsal plan":{"assign":{"t20s1":"g21","t20s2":"g0","t20s3":"g1","t20s4":"g45","t20s5":"g22","t20s6":"g20","t20s7":"g19","t20s8":"g46","t20s9":"g18","t20s10":"g44","t41s1":"g2","t41s2":"g48","t41s3":"g49","t41s5":"g3","t41s6":"g47","t41s7":"g50","t43s1":"g29","t43s2":"g38","t43s3":"g40","t43s4":"g33","t43s5":"g30","t43s6":"g39","t43s7":"g41","t11s1":"g4","t11s2":"g6","t11s3":"g8","t11s4":"g11","t11s5":"g5","t11s6":"g7","t11s7":"g9","t11s8":"g10","t11s9":"g51","t33s1":"g43","t33s2":"g16","t33s3":"g42","t33s4":"g17","t30s1":"g23","t30s2":"g27","t30s3":"g25","t30s4":"g24","t30s5":"g28","t30s6":"g26","t16s1":"g12","t16s2":"g14","t16s4":"g13","t16s5":"g15","t35s1":"g36","t35s2":"g37","t35s3":"g31","t35s4":"g32","t35s5":"g34","t35s6":"g35"},"locked":{},"pos":{},"updated":0}}}/*SEED-END*/;
 function blank(){return {assign:{},locked:{},pos:{},updated:Date.now()};}
 function freshStore(){
   if(SEED && SEED.designs) return JSON.parse(JSON.stringify(SEED));
