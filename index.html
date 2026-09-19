@@ -79,6 +79,14 @@
   .seat.full{background:var(--seatfull);color:#fff;border-color:var(--seatfull)}
   .seat.locked{background:var(--seatlock);color:#241f10;border-color:#a5831a}
   .seat.drop{outline:2px dashed var(--gold);outline-offset:2px}
+  /* seat number 1-8, on the side of the circle away from the table */
+  .seat{position:relative}
+  .seat::after{content:attr(data-n);position:absolute;font:700 9px/1 sans-serif;color:#8a806f;pointer-events:none}
+  .seatrow:first-child .seat::after{bottom:100%;left:50%;transform:translate(-50%,-10px)}
+  .seatrow:last-child .seat::after{top:100%;left:50%;transform:translate(-50%,10px)}
+  .seatcol:first-child .seat::after{right:100%;top:50%;transform:translate(-11px,-50%)}
+  .seatcol:last-child .seat::after{left:100%;top:50%;transform:translate(11px,-50%)}
+  .seatrow{padding:17px 0 !important}
 
   /* popover */
   #pop{position:absolute;z-index:50;background:#fff;border:1px solid var(--line);border-radius:8px;
@@ -268,7 +276,7 @@
     .seat.allergy{border:4px solid #000;box-shadow:0 0 0 2px #fff,0 0 0 4px #000;font-weight:900;font-size:12px}
     /* wedding chart: the legend sits in the empty space beside the floor tables */
     .zone{position:relative}
-    .zone > #allergyleg{position:absolute;right:0;top:22px;width:190px}
+    .zone > #allergyleg{position:absolute;right:0;top:22px;width:175px}
     /* rehearsal: the legend sits beside the room */
     #printrow{display:flex;align-items:flex-start;gap:24px}
     #printrow > #planwrap{flex:0 0 auto}
@@ -646,7 +654,7 @@ function initials(n){
 /* ============ build chart ============ */
 function makeSeat(t,s){
   var d=document.createElement('div');
-  d.className='seat'; d.dataset.seat=seatId(t,s); d.draggable=true;
+  d.className='seat'; d.dataset.seat=seatId(t,s); d.dataset.n=s; d.draggable=true;
   d.addEventListener('click',onSeatClick);
   d.addEventListener('contextmenu',function(e){e.preventDefault();toggleLock(d.dataset.seat);});
   d.addEventListener('mouseenter',showTip);
