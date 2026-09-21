@@ -92,6 +92,8 @@
 
   #roster{display:none;margin-top:10px}
   #roster.on{display:block}
+  /* roster view replaces the chart on every screen, not just phones */
+  #main.showroster #planwrap,#main.showroster #zoombar,#main.showroster #movebar{display:none !important}
   .rtable{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;margin-bottom:8px}
   .rtable h4{margin:0 0 6px;font:600 12px/1 sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
   .rtable ul.seats{margin:0;padding:0;list-style:none;font-size:13px}
@@ -1063,7 +1065,7 @@ function renderRoster(){
 
 /* ============ toolbar ============ */
 document.getElementById('btnroster').onclick=function(){
-  document.getElementById('roster').classList.toggle('on');
+  setView(mainEl.classList.contains('showroster')?'chart':'roster');
 };
 document.getElementById('btn3d').onclick=function(){location.href='rehearsal_venue.html';};
 document.getElementById('btnmove').onclick=function(){ setMoving(!moving); };
@@ -1179,6 +1181,8 @@ function setView(v){
   document.getElementById('roster').classList.toggle('on',roster);
   document.getElementById('movchart').classList.toggle('on',!roster);
   document.getElementById('movroster').classList.toggle('on',roster);
+  var rb=document.getElementById('btnroster'); if(rb) rb.textContent=roster?'Chart view':'Roster view';
+  if(roster) window.scrollTo(0,0), mainEl.scrollTop=0;
   if(!roster && isNarrow()) fitZoom();
 }
 document.getElementById('movchart').onclick=function(){setView('chart');};
